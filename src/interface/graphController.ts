@@ -7,8 +7,8 @@ export class GraphController {
   getGraph = async (req: Request, res: Response) => {
     const { user } = req.query as { user: string };
 
-    this.graphUseCase.createGraph(user);
+    const contributions = await this.graphUseCase.createGraph(user);
 
-    res.status(200).json();
+    res.status(200).json(contributions);
   };
 }
