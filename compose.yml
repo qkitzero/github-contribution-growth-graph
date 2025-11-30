@@ -1,0 +1,13 @@
+services:
+  github-contribution-growth-graph-server:
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    container_name: github-contribution-growth-graph-server
+    restart: always
+    environment:
+      - ENV=${ENV}
+      - PORT=${SERVER_CONTAINER_PORT}
+      - GITHUB_TOKEN=${GITHUB_TOKEN}
+    ports:
+      - "${SERVER_HOST_PORT}:${SERVER_CONTAINER_PORT}"

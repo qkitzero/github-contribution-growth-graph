@@ -1,1 +1,1 @@
-# github-contribution-growth-graph
+# Github Contribution Growth Graph

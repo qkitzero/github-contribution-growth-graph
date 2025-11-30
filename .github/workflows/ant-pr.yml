@@ -1,0 +1,23 @@
+name: Ant PR
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    branches-ignore:
+      - 'main'
+
+permissions:
+  pull-requests: write
+
+jobs:
+  ant-pr:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: qkitzero/ant-pr@v1.5.0
+        with:
+          config-path: '.ant-pr.yml'
+          github-token: ${{ secrets.GITHUB_TOKEN }}
