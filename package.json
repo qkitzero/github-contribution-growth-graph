@@ -1,5 +1,5 @@
 {
-  "name": "github-bontrib-growth-graph",
+  "name": "github-contribution-growth-graph",
   "version": "0.0.0",
   "main": "dist/server.js",
   "scripts": {
