@@ -1,0 +1,29 @@
+{
+  "name": "github-bontrib-growth-graph",
+  "version": "0.0.0",
+  "main": "dist/server.js",
+  "scripts": {
+    "format": "prettier --write \"src/**/*.ts\"",
+    "lint": "eslint \"src/**/*.ts\"",
+    "lint:fix": "eslint \"src/**/*.ts\" --fix",
+    "build": "rimraf dist && tsc",
+    "start": "node dist/server.js",
+    "dev": "ts-node-dev --respawn --transpile-only src/server.ts",
+    "test": "jest",
+    "test:cov": "jest --coverage",
+    "coverage:open": "open coverage/lcov-report/index.html"
+  },
+  "dependencies": {
+    "express": "^5.1.0"
+  },
+  "devDependencies": {
+    "@tsconfig/node24": "^24.0.3",
+    "@types/express": "^5.0.5",
+    "@types/node": "^24.10.1",
+    "prettier": "^3.7.3",
+    "prettier-plugin-organize-imports": "^4.3.0",
+    "rimraf": "^6.1.2",
+    "ts-node-dev": "^2.0.0",
+    "typescript": "^5.9.3"
+  }
+}
