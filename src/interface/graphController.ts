@@ -7,8 +7,9 @@ export class GraphController {
   getGraph = async (req: Request, res: Response) => {
     const { user } = req.query as { user: string };
 
-    const contributions = await this.graphUseCase.createGraph(user);
+    const image = await this.graphUseCase.createGraph(user);
 
-    res.status(200).json(contributions);
+    res.setHeader('Content-Type', 'image/png');
+    res.status(200).send(image);
   };
 }
