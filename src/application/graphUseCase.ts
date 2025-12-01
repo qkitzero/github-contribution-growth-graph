@@ -4,24 +4,43 @@ import { Contribution } from '../domain/contribution/contribution';
 import { fetchGitHubContributions } from '../infrastructure/api/fetchGitHubContributions';
 
 export interface GraphUseCase {
-  createGraph(user: string): Promise<Buffer>;
+  createGraph(user: string, from?: string, to?: string): Promise<Buffer>;
 }
 
 export class GraphUseCaseImpl implements GraphUseCase {
   constructor() {}
 
-  async createGraph(user: string): Promise<Buffer> {
-    const to = new Date();
-    const from = new Date();
-    from.setFullYear(to.getFullYear() - 1);
+  async createGraph(user: string, from?: string, to?: string): Promise<Buffer> {
+    const now = new Date();
+    const toDate = to ? new Date(to) : now;
+    const fromDate = from
+      ? new Date(from)
+      : new Date(new Date(toDate).setFullYear(toDate.getFullYear() - 1));
 
-    const contributions = await fetchGitHubContributions(
-      user,
-      from.toISOString(),
-      to.toISOString(),
-    );
+    const promises: Promise<Contribution[]>[] = [];
 
-    const image = await generateGraphImage(contributions);
+    let currentDate = fromDate;
+
+    while (currentDate < toDate) {
+      const nextDate = new Date(currentDate);
+      nextDate.setFullYear(currentDate.getFullYear() + 1);
+
+      promises.push(
+        fetchGitHubContributions(
+          user,
+          currentDate.toISOString(),
+          (nextDate < toDate ? nextDate : toDate).toISOString(),
+        ),
+      );
+      currentDate = nextDate;
+    }
+
+    const contributions = await Promise.all(promises);
+    const sortedContributions = contributions
+      .flat()
+      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+
+    const image = await generateGraphImage(sortedContributions);
 
     return image;
   }
