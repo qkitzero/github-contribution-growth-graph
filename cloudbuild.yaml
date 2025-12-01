@@ -1,0 +1,33 @@
+steps:
+  - name: gcr.io/cloud-builders/docker
+    entrypoint: docker
+    args:
+      - build
+      - -t
+      - us-central1-docker.pkg.dev/$PROJECT_ID/github-contribution-growth-graph/$COMMIT_SHA
+      - -f
+      - ./Dockerfile
+      - .
+
+  - name: gcr.io/cloud-builders/docker
+    args:
+      - push
+      - us-central1-docker.pkg.dev/$PROJECT_ID/github-contribution-growth-graph/$COMMIT_SHA
+
+  - name: gcr.io/google.com/cloudsdktool/cloud-sdk
+    entrypoint: bash
+    args:
+      - -c
+      - |
+        gcloud secrets versions access latest --secret=github-contribution-growth-graph-env-file > .env
+        gcloud run deploy github-contribution-growth-graph \
+          --image=us-central1-docker.pkg.dev/$PROJECT_ID/github-contribution-growth-graph/$COMMIT_SHA \
+          --region=us-central1 \
+          --platform=managed \
+          --set-env-vars=$$(cat .env | xargs | sed 's/ /,/g')
+
+images:
+  - us-central1-docker.pkg.dev/$PROJECT_ID/github-contribution-growth-graph/$COMMIT_SHA
+
+options:
+  logging: CLOUD_LOGGING_ONLY
