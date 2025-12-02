@@ -24,6 +24,11 @@ steps:
           --image=us-central1-docker.pkg.dev/$PROJECT_ID/github-contribution-growth-graph/$COMMIT_SHA \
           --region=us-central1 \
           --platform=managed \
+          --min-instances=0 \
+          --max-instances=1 \
+          --memory=128Mi \
+          --cpu=1 \
+          --allow-unauthenticated \
           --set-env-vars=$$(cat .env | xargs | sed 's/ /,/g')
 
 images:
