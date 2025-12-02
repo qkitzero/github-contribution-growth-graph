@@ -1,24 +1,55 @@
-import { ChartConfiguration } from 'chart.js';
-import { ChartJSNodeCanvas } from 'chartjs-node-canvas';
-import { Contribution } from '../domain/contribution/contribution';
-import { fetchGitHubContributions } from '../infrastructure/api/fetchGitHubContributions';
+import { Contribution, ContributionAggregator } from '../domain/contribution/contribution';
+import { GitHubContributionFetcher } from '../infrastructure/github/githubContributionFetcher';
+import { GraphImageGenerator } from '../domain/graph/graphImageGenerator';
 
 export interface GraphUseCase {
   createGraph(user: string, from?: string, to?: string): Promise<Buffer>;
 }
 
 export class GraphUseCaseImpl implements GraphUseCase {
-  constructor() {}
+  private contributionFetcher: GitHubContributionFetcher;
+  private contributionAggregator = new ContributionAggregator();
+  private graphImageGenerator: GraphImageGenerator;
+
+  constructor(
+    contributionFetcher: GitHubContributionFetcher = new GitHubContributionFetcher(),
+    graphImageGenerator: GraphImageGenerator = new GraphImageGenerator(),
+  ) {
+    this.contributionFetcher = contributionFetcher;
+    this.graphImageGenerator = graphImageGenerator;
+  }
 
   async createGraph(user: string, from?: string, to?: string): Promise<Buffer> {
+    // 日付範囲の計算
     const now = new Date();
     const toDate = to ? new Date(to) : now;
     const fromDate = from
       ? new Date(from)
       : new Date(new Date(toDate).setFullYear(toDate.getFullYear() - 1));
 
-    const promises: Promise<Contribution[]>[] = [];
+    // コントリビューションを年単位でバッチ取得
+    const contributions = await this.fetchContributions(user, fromDate, toDate);
 
+    // 日付順にソート
+    const sortedContributions = this.contributionAggregator.sortByDate(contributions);
+
+    // 累積値を計算
+    const cumulativeContributions =
+      this.contributionAggregator.calculateCumulative(sortedContributions);
+
+    // グラフ描画用データに変換
+    const graphData = this.contributionAggregator.toGraphData(cumulativeContributions);
+
+    // 画像を生成して返却
+    return await this.graphImageGenerator.generate(graphData);
+  }
+
+  private async fetchContributions(
+    user: string,
+    fromDate: Date,
+    toDate: Date,
+  ): Promise<Contribution[]> {
+    const promises: Promise<Contribution[]>[] = [];
     let currentDate = fromDate;
 
     while (currentDate < toDate) {
@@ -26,7 +57,7 @@ export class GraphUseCaseImpl implements GraphUseCase {
       nextDate.setFullYear(currentDate.getFullYear() + 1);
 
       promises.push(
-        fetchGitHubContributions(
+        this.contributionFetcher.fetch(
           user,
           currentDate.toISOString(),
           (nextDate < toDate ? nextDate : toDate).toISOString(),
@@ -35,90 +66,7 @@ export class GraphUseCaseImpl implements GraphUseCase {
       currentDate = nextDate;
     }
 
-    const contributions = await Promise.all(promises);
-    const sortedContributions = contributions
-      .flat()
-      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
-
-    const image = await generateGraphImage(sortedContributions);
-
-    return image;
+    const results = await Promise.all(promises);
+    return results.flat();
   }
 }
-
-const width = 800;
-const height = 400;
-
-const chartJSNodeCanvas = new ChartJSNodeCanvas({
-  width,
-  height,
-  chartCallback: (ChartJS) => {
-    ChartJS.defaults.responsive = true;
-    ChartJS.defaults.maintainAspectRatio = false;
-  },
-});
-
-export const generateGraphImage = async (contributions: Contribution[]): Promise<Buffer> => {
-  const cumulativeContributions = contributions.reduce(
-    (acc, a) => {
-      const total = (acc.length > 0 ? acc[acc.length - 1].total : 0) + a.count;
-      acc.push({
-        date: new Date(a.date),
-        total,
-      });
-      return acc;
-    },
-    [] as { date: Date; total: number }[],
-  );
-
-  const labels = cumulativeContributions.map((c) =>
-    c.date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
-  );
-  const data = cumulativeContributions.map((c) => c.total);
-
-  const configuration: ChartConfiguration = {
-    type: 'line',
-    data: {
-      labels: labels,
-      datasets: [
-        {
-          label: 'Cumulative Contributions',
-          data: data,
-          borderColor: 'rgb(75, 192, 192)',
-          tension: 0.1,
-          pointRadius: 0,
-        },
-      ],
-    },
-    options: {
-      scales: {
-        x: {
-          title: {
-            display: true,
-            text: 'Date',
-          },
-        },
-        y: {
-          title: {
-            display: true,
-            text: 'Cumulative Contributions',
-          },
-          beginAtZero: true,
-        },
-      },
-      plugins: {
-        legend: {
-          display: true,
-          position: 'top',
-        },
-        title: {
-          display: true,
-          text: 'GitHub Contribution Growth',
-        },
-      },
-    },
-  };
-
-  const image = await chartJSNodeCanvas.renderToBuffer(configuration);
-  return image;
-};
