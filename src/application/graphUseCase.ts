@@ -86,6 +86,7 @@ export const generateGraphImage = async (contributions: Contribution[]): Promise
           data: data,
           borderColor: 'rgb(75, 192, 192)',
           tension: 0.1,
+          pointRadius: 0,
         },
       ],
     },
