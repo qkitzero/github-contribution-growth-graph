@@ -24,7 +24,7 @@ export class GraphUseCaseImpl implements GraphUseCase {
       nextDate.setFullYear(currentDate.getFullYear() + 1);
 
       promises.push(
-        this.githubClient.GetContributions(
+        this.githubClient.getContributions(
           user,
           currentDate.toISOString(),
           (nextDate < toDate ? nextDate : toDate).toISOString(),

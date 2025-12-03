@@ -28,7 +28,7 @@ export class Client {
     });
   }
 
-  async GetContributions(userName: string, from: string, to: string): Promise<Contribution[]> {
+  async getContributions(userName: string, from: string, to: string): Promise<Contribution[]> {
     const query = gql`
       query ($userName: String!, $from: DateTime!, $to: DateTime!) {
         user(login: $userName) {
