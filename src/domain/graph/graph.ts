@@ -1,17 +1,15 @@
 import { ChartConfiguration } from 'chart.js';
 import { ChartJSNodeCanvas } from 'chartjs-node-canvas';
-import { GraphData } from '../contribution/contribution';
 
-const DEFAULT_WIDTH = 800;
-const DEFAULT_HEIGHT = 400;
+export type GraphData = {
+  labels: string[];
+  values: number[];
+};
 
-/**
- * Chart.jsを使用してグラフ画像を生成するクラス
- */
-export class GraphImageGenerator {
+export class Graph {
   private chartJSNodeCanvas: ChartJSNodeCanvas;
 
-  constructor(width: number = DEFAULT_WIDTH, height: number = DEFAULT_HEIGHT) {
+  constructor(width: number = 800, height: number = 400) {
     this.chartJSNodeCanvas = new ChartJSNodeCanvas({
       width,
       height,
@@ -22,12 +20,9 @@ export class GraphImageGenerator {
     });
   }
 
-  /**
-   * グラフデータからPNG画像のBufferを生成
-   */
   async generate(graphData: GraphData): Promise<Buffer> {
-    const configuration = this.createChartConfiguration(graphData);
-    return await this.chartJSNodeCanvas.renderToBuffer(configuration);
+    const chartConfiguration = this.createChartConfiguration(graphData);
+    return await this.chartJSNodeCanvas.renderToBuffer(chartConfiguration);
   }
 
   private createChartConfiguration(graphData: GraphData): ChartConfiguration {
