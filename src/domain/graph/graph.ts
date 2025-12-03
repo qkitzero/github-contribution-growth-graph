@@ -18,13 +18,13 @@ export class Graph {
   constructor(
     width: number = 800,
     height: number = 400,
-    backgroundColour: string = 'transparent',
+    bgColor: string = 'transparent',
     borderColor: string = 'blue',
   ) {
     this.chartJSNodeCanvas = new ChartJSNodeCanvas({
       width,
       height,
-      backgroundColour,
+      backgroundColour: bgColor,
       chartCallback: (ChartJS) => {
         ChartJS.defaults.responsive = true;
         ChartJS.defaults.maintainAspectRatio = false;
