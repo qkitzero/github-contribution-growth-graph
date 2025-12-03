@@ -60,10 +60,9 @@ export class Client {
     const contributions =
       contributionsResponse.user.contributionsCollection.contributionCalendar.weeks.flatMap(
         (week) =>
-          week.contributionDays.map((day) => ({
-            date: day.date,
-            count: day.contributionCount,
-          })),
+          week.contributionDays.map(
+            (day) => new Contribution(new Date(day.date), day.contributionCount),
+          ),
       );
 
     return contributions;
