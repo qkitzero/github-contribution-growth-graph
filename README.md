@@ -32,5 +32,5 @@ This service fetches GitHub contribution data and visualizes it as a customizabl
 
 <!-- Custom colors and size -->
 
-[![Graph](https://github-contribution-growth-graph.qkitzero.xyz/graphs?user=qkitzero&bg=white&color=&width=1000&height=500)](https://github.com/qkitzero/github-contribution-growth-graph)
+[![Graph](https://github-contribution-growth-graph.qkitzero.xyz/graphs?user=qkitzero&bg=white&color=red&width=1000&height=500)](https://github.com/qkitzero/github-contribution-growth-graph)
 ```
