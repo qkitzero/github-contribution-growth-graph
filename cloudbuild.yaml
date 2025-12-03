@@ -28,6 +28,8 @@ steps:
           --max-instances=1 \
           --memory=128Mi \
           --cpu=1 \
+          --concurrency=80 \
+          --timeout=30 \
           --allow-unauthenticated \
           --set-env-vars=$$(cat .env | xargs | sed 's/ /,/g')
 
