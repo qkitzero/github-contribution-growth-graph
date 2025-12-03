@@ -1,48 +1,56 @@
-import { Contribution, ContributionAggregator } from '../domain/contribution/contribution';
+import { Contribution } from '../domain/contribution/contribution';
 import { Graph } from '../domain/graph/graph';
 import { Client as GitHubClient } from '../infrastructure/api/github/client';
 
 export interface GraphUseCase {
-  createGraph(user: string, from?: string, to?: string): Promise<Buffer>;
+  createGraph(
+    user: string,
+    from?: string,
+    to?: string,
+    width?: number,
+    height?: number,
+    bg?: string,
+    color?: string,
+  ): Promise<Buffer>;
 }
 
 export class GraphUseCaseImpl implements GraphUseCase {
   constructor(private readonly githubClient: GitHubClient) {}
 
-  async createGraph(user: string, from?: string, to?: string): Promise<Buffer> {
+  async createGraph(
+    user: string,
+    from?: string,
+    to?: string,
+    width?: number,
+    height?: number,
+    bg?: string,
+    color?: string,
+  ): Promise<Buffer> {
     const now = new Date();
     const toDate = to ? new Date(to) : now;
     const fromDate = from
       ? new Date(from)
-      : new Date(new Date(toDate).setFullYear(toDate.getFullYear() - 1));
+      : new Date(toDate.getFullYear() - 1, toDate.getMonth(), toDate.getDate());
 
     const promises: Promise<Contribution[]>[] = [];
-    let currentDate = fromDate;
+    let cursor = fromDate;
 
-    while (currentDate < toDate) {
-      const nextDate = new Date(currentDate);
-      nextDate.setFullYear(currentDate.getFullYear() + 1);
+    while (cursor < toDate) {
+      const next = new Date(cursor);
+      next.setFullYear(cursor.getFullYear() + 1);
 
-      promises.push(
-        this.githubClient.getContributions(
-          user,
-          currentDate.toISOString(),
-          (nextDate < toDate ? nextDate : toDate).toISOString(),
-        ),
-      );
-      currentDate = nextDate;
+      const rangeEnd = next < toDate ? next : toDate;
+      const startISO = cursor.toISOString();
+      const endISO = rangeEnd.toISOString();
+
+      promises.push(this.githubClient.getContributions(user, startISO, endISO));
+      cursor = next;
     }
 
-    const results = await Promise.all(promises);
+    const contributions = (await Promise.all(promises)).flat();
 
-    const contributions = results.flat();
+    const graph = new Graph(width, height, bg, color);
 
-    const contributionAggregator = new ContributionAggregator(contributions);
-
-    const graphData = contributionAggregator.getGraphData();
-
-    const graph = new Graph();
-
-    return await graph.generate(graphData);
+    return graph.generate(contributions);
   }
 }
