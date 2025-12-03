@@ -34,7 +34,7 @@ export class Graph {
   }
 
   async generate(contributions: Contribution[]): Promise<Buffer> {
-    const sorted = contributions.sort((a, b) => a.date.getTime() - b.date.getTime());
+    const sorted = [...contributions].sort((a, b) => a.date.getTime() - b.date.getTime());
 
     let runningTotal = 0;
     const totals = sorted.map((c) => {
