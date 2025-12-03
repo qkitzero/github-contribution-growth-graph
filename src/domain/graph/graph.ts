@@ -9,10 +9,11 @@ export type GraphData = {
 export class Graph {
   private chartJSNodeCanvas: ChartJSNodeCanvas;
 
-  constructor(width: number = 800, height: number = 400) {
+  constructor(width: number = 800, height: number = 400, backgroundColour: string = 'transparent') {
     this.chartJSNodeCanvas = new ChartJSNodeCanvas({
       width,
       height,
+      backgroundColour,
       chartCallback: (ChartJS) => {
         ChartJS.defaults.responsive = true;
         ChartJS.defaults.maintainAspectRatio = false;
