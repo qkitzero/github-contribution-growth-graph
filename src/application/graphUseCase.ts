@@ -3,13 +3,29 @@ import { Graph } from '../domain/graph/graph';
 import { Client as GitHubClient } from '../infrastructure/api/github/client';
 
 export interface GraphUseCase {
-  createGraph(user: string, from?: string, to?: string): Promise<Buffer>;
+  createGraph(
+    user: string,
+    from?: string,
+    to?: string,
+    width?: number,
+    height?: number,
+    bg?: string,
+    color?: string,
+  ): Promise<Buffer>;
 }
 
 export class GraphUseCaseImpl implements GraphUseCase {
   constructor(private readonly githubClient: GitHubClient) {}
 
-  async createGraph(user: string, from?: string, to?: string): Promise<Buffer> {
+  async createGraph(
+    user: string,
+    from?: string,
+    to?: string,
+    width?: number,
+    height?: number,
+    bg?: string,
+    color?: string,
+  ): Promise<Buffer> {
     const now = new Date();
     const toDate = to ? new Date(to) : now;
     const fromDate = from
@@ -33,6 +49,8 @@ export class GraphUseCaseImpl implements GraphUseCase {
 
     const contributions = (await Promise.all(promises)).flat();
 
-    return new Graph().generate(contributions);
+    const graph = new Graph(width, height, bg, color);
+
+    return graph.generate(contributions);
   }
 }

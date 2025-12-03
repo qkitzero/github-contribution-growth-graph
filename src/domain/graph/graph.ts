@@ -2,6 +2,15 @@ import { ChartConfiguration } from 'chart.js';
 import { ChartJSNodeCanvas } from 'chartjs-node-canvas';
 import { Contribution } from '../contribution/contribution';
 
+const COLORS: Record<string, string> = {
+  blue: '#4bc0c0ff',
+  red: '#ff4444ff',
+  green: '#36a64fff',
+  purple: '#9966ffff',
+  orange: '#ff9933ff',
+  pink: '#ff6b9dff',
+};
+
 export class Graph {
   private chartJSNodeCanvas: ChartJSNodeCanvas;
   private borderColor: string;
@@ -10,7 +19,7 @@ export class Graph {
     width: number = 800,
     height: number = 400,
     backgroundColour: string = 'transparent',
-    borderColor: string = '#4bc0c0ff',
+    borderColor: string = 'blue',
   ) {
     this.chartJSNodeCanvas = new ChartJSNodeCanvas({
       width,
@@ -21,7 +30,7 @@ export class Graph {
         ChartJS.defaults.maintainAspectRatio = false;
       },
     });
-    this.borderColor = borderColor;
+    this.borderColor = COLORS[borderColor] || COLORS.blue;
   }
 
   async generate(contributions: Contribution[]): Promise<Buffer> {
