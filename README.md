@@ -13,24 +13,10 @@ This service fetches GitHub contribution data and visualizes it as a customizabl
 
 ### Query Parameters
 
-| Parameter | Type   | Required | Description             | Default     |
-| --------- | ------ | -------- | ----------------------- | ----------- |
-| `user`    | string | Yes      | GitHub username         | -           |
-| `from`    | string | No       | Start date (YYYY-MM-DD) | 1 year ago  |
-| `to`      | string | No       | End date (YYYY-MM-DD)   | Today       |
-| `width`   | number | No       | Image width in pixels   | 800         |
-| `height`  | number | No       | Image height in pixels  | 400         |
-| `bg`      | string | No       | Background color        | transparent |
-| `color`   | string | No       | Graph color             | blue        |
-
-### Examples
-
-```markdown
-<!-- Custom date range -->
-
-[![Graph](https://github-contribution-growth-graph.qkitzero.xyz/graphs?user=qkitzero&from=2024-01-01&to=2024-12-31)](https://github.com/qkitzero/github-contribution-growth-graph)
-
-<!-- Custom colors and size -->
-
-[![Graph](https://github-contribution-growth-graph.qkitzero.xyz/graphs?user=qkitzero&bg=white&color=red&width=1000&height=500)](https://github.com/qkitzero/github-contribution-growth-graph)
-```
+| Parameter | Type   | Required | Description                               | Default    |
+| --------- | ------ | -------- | ----------------------------------------- | ---------- |
+| `user`    | string | **Yes**  | GitHub username                           | -          |
+| `from`    | string | No       | Start date (YYYY-MM-DD)                   | 1 year ago |
+| `to`      | string | No       | End date (YYYY-MM-DD)                     | Today      |
+| `theme`   | string | No       | Graph theme (`red`, `green`, `dark`, ...) | `default`  |
+| `size`    | string | No       | Graph size (`small`, `medium`, `large`)   | `medium`   |

@@ -7,10 +7,8 @@ export interface GraphUseCase {
     user: string,
     from?: string,
     to?: string,
-    width?: number,
-    height?: number,
-    bg?: string,
-    color?: string,
+    theme?: string,
+    size?: string,
   ): Promise<Buffer>;
 }
 
@@ -21,10 +19,8 @@ export class GraphUseCaseImpl implements GraphUseCase {
     user: string,
     from?: string,
     to?: string,
-    width?: number,
-    height?: number,
-    bg?: string,
-    color?: string,
+    theme?: string,
+    size?: string,
   ): Promise<Buffer> {
     const now = new Date();
     const toDate = to ? new Date(to) : now;
@@ -49,7 +45,7 @@ export class GraphUseCaseImpl implements GraphUseCase {
 
     const contributions = (await Promise.all(promises)).flat();
 
-    const graph = new Graph(width, height, bg, color);
+    const graph = new Graph(theme, size);
 
     return graph.generate(contributions);
   }

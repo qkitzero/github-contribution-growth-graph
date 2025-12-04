@@ -1,36 +1,26 @@
 import { ChartConfiguration } from 'chart.js';
 import { ChartJSNodeCanvas } from 'chartjs-node-canvas';
 import { Contribution } from '../contribution/contribution';
-
-const COLORS: Record<string, string> = {
-  blue: '#4bc0c0ff',
-  red: '#ff4444ff',
-  green: '#36a64fff',
-  purple: '#9966ffff',
-  orange: '#ff9933ff',
-  pink: '#ff6b9dff',
-};
+import { Size } from './size';
+import { Theme } from './theme';
 
 export class Graph {
   private chartJSNodeCanvas: ChartJSNodeCanvas;
-  private borderColor: string;
+  private theme: Theme;
+  private size: Size;
 
-  constructor(
-    width: number = 800,
-    height: number = 400,
-    bgColor: string = 'transparent',
-    borderColor: string = 'blue',
-  ) {
+  constructor(theme?: string, size?: string) {
+    this.theme = new Theme(theme);
+    this.size = new Size(size);
     this.chartJSNodeCanvas = new ChartJSNodeCanvas({
-      width,
-      height,
-      backgroundColour: bgColor,
+      width: this.size.width,
+      height: this.size.height,
+      backgroundColour: this.theme.backgroundColor,
       chartCallback: (ChartJS) => {
         ChartJS.defaults.responsive = true;
         ChartJS.defaults.maintainAspectRatio = false;
       },
     });
-    this.borderColor = COLORS[borderColor] || COLORS.blue;
   }
 
   async generate(contributions: Contribution[]): Promise<Buffer> {
@@ -62,7 +52,7 @@ export class Graph {
           {
             label: 'Cumulative Contributions',
             data: values,
-            borderColor: this.borderColor,
+            borderColor: this.theme.lineColor,
             tension: 0.1,
             pointRadius: 0,
           },
