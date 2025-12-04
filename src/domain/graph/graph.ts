@@ -45,9 +45,12 @@ export class Graph {
       };
     });
 
-    const labels = totals.map((c) =>
-      c.date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
-    );
+    const labels = totals.map((c) => {
+      const d = c.date;
+      const year = d.getFullYear();
+      const month = String(d.getMonth() + 1).padStart(2, '0');
+      return `${year}/${month}`;
+    });
 
     const values = totals.map((c) => c.total);
 
@@ -67,15 +70,27 @@ export class Graph {
       },
       options: {
         scales: {
-          x: { title: { display: true, text: 'Date' } },
+          x: {
+            title: { display: false, text: 'Date' },
+            ticks: {
+              autoSkip: false,
+              callback: function (value, index, ticks) {
+                const label = this.getLabelForValue(index as number);
+                const prevLabel = this.getLabelForValue((index as number) - 1);
+                if (index === 0) return label;
+                if (label === prevLabel) return '';
+                return label;
+              },
+            },
+          },
           y: {
-            title: { display: true, text: 'Cumulative Contributions' },
+            title: { display: false, text: 'Cumulative Contributions' },
             beginAtZero: true,
           },
         },
         plugins: {
           legend: { display: true, position: 'top' },
-          title: { display: true, text: 'GitHub Contribution Growth' },
+          title: { display: true, text: 'GitHub Contribution Growth Graph' },
         },
       },
     };
