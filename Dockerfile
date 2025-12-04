@@ -1,6 +1,6 @@
 FROM node:24-slim AS builder
 
-RUN apt-get update && apt-get install -y \
+RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
     python3 \
     pkg-config \
@@ -20,7 +20,7 @@ RUN npm prune --production
 
 FROM node:24-slim
 
-RUN apt-get update && apt-get install -y \
+RUN apt-get update && apt-get install -y --no-install-recommends \
     libcairo2 \
     libpango-1.0-0 \
     libjpeg62-turbo \
