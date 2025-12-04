@@ -16,7 +16,8 @@ export class Size {
   } as const;
 
   constructor(name: string = 'medium') {
-    const preset = Size.PRESET[name as keyof typeof Size.PRESET] ?? Size.PRESET.medium;
+    const key: SizeName = name in Size.PRESET ? (name as SizeName) : 'medium';
+    const preset = Size.PRESET[key];
 
     this.width = preset.width;
     this.height = preset.height;

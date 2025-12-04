@@ -31,7 +31,8 @@ export class Theme {
   } as const;
 
   constructor(name: string = 'default') {
-    const preset = Theme.PRESET[name as keyof typeof Theme.PRESET] ?? Theme.PRESET.default;
+    const key: ThemeName = name in Theme.PRESET ? (name as ThemeName) : 'default';
+    const preset = Theme.PRESET[key];
 
     this.backgroundColor = preset.background;
     this.lineColor = preset.line;
