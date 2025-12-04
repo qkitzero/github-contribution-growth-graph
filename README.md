@@ -13,15 +13,13 @@ This service fetches GitHub contribution data and visualizes it as a customizabl
 
 ### Query Parameters
 
-| Parameter | Type   | Required | Description             | Default     |
-| --------- | ------ | -------- | ----------------------- | ----------- |
-| `user`    | string | Yes      | GitHub username         | -           |
-| `from`    | string | No       | Start date (YYYY-MM-DD) | 1 year ago  |
-| `to`      | string | No       | End date (YYYY-MM-DD)   | Today       |
-| `width`   | number | No       | Image width in pixels   | 800         |
-| `height`  | number | No       | Image height in pixels  | 400         |
-| `bg`      | string | No       | Background color        | transparent |
-| `color`   | string | No       | Graph color             | blue        |
+| Parameter | Type   | Required | Description             | Default    |
+| --------- | ------ | -------- | ----------------------- | ---------- |
+| `user`    | string | Yes      | GitHub username         | -          |
+| `from`    | string | No       | Start date (YYYY-MM-DD) | 1 year ago |
+| `to`      | string | No       | End date (YYYY-MM-DD)   | Today      |
+| `theme`   | string | No       | Graph theme             | default    |
+| `size`    | string | No       | Graph size              | medium     |
 
 ### Examples
 
