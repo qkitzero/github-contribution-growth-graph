@@ -22,10 +22,13 @@
   "devDependencies": {
     "@tsconfig/node24": "^24.0.3",
     "@types/express": "^5.0.5",
+    "@types/jest": "^30.0.0",
     "@types/node": "^24.10.1",
+    "jest": "^30.2.0",
     "prettier": "^3.7.3",
     "prettier-plugin-organize-imports": "^4.3.0",
     "rimraf": "^6.1.2",
+    "ts-jest": "^29.4.6",
     "ts-node-dev": "^2.0.0",
     "typescript": "^5.9.3"
   }
