@@ -62,16 +62,6 @@ export class Graph {
         scales: {
           x: {
             title: { display: false, text: 'Date' },
-            ticks: {
-              autoSkip: false,
-              callback: function (value, index, ticks) {
-                const label = this.getLabelForValue(index);
-                if (index === 0) return label;
-                const prevLabel = this.getLabelForValue(index - 1);
-                if (label === prevLabel) return '';
-                return label;
-              },
-            },
           },
           y: {
             title: { display: false, text: 'Cumulative Contributions' },
