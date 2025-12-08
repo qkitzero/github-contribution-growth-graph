@@ -8,6 +8,7 @@ describe('Contribution', () => {
 
       const contribution = new Contribution(date, count);
 
+      expect(contribution).toBeInstanceOf(Contribution);
       expect(contribution.date).toBe(date);
       expect(contribution.count).toBe(count);
     });
@@ -18,6 +19,7 @@ describe('Contribution', () => {
 
       const contribution = new Contribution(date, count);
 
+      expect(contribution).toBeInstanceOf(Contribution);
       expect(contribution.date).toBe(date);
       expect(contribution.count).toBe(count);
     });
@@ -28,6 +30,7 @@ describe('Contribution', () => {
 
       const contribution = new Contribution(date, count);
 
+      expect(contribution).toBeInstanceOf(Contribution);
       expect(contribution.date).toBe(date);
       expect(contribution.count).toBe(count);
     });
