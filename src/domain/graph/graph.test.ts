@@ -6,25 +6,25 @@ describe('Graph', () => {
     it('should create graph with default theme and size', () => {
       const graph = new Graph();
 
-      expect(graph).toBeDefined();
+      expect(graph).toBeInstanceOf(Graph);
     });
 
     it('should create graph with specified theme', () => {
       const graph = new Graph('red');
 
-      expect(graph).toBeDefined();
+      expect(graph).toBeInstanceOf(Graph);
     });
 
     it('should create graph with specified size', () => {
       const graph = new Graph(undefined, 'large');
 
-      expect(graph).toBeDefined();
+      expect(graph).toBeInstanceOf(Graph);
     });
 
     it('should create graph with specified theme and size', () => {
       const graph = new Graph('dark', 'small');
 
-      expect(graph).toBeDefined();
+      expect(graph).toBeInstanceOf(Graph);
     });
   });
 
@@ -41,6 +41,9 @@ describe('Graph', () => {
 
       expect(buffer).toBeInstanceOf(Buffer);
       expect(buffer.length).toBeGreaterThan(0);
+      expect(buffer.subarray(0, 8)).toEqual(
+        Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]),
+      );
     });
 
     it('should generate graph with empty contributions', async () => {
@@ -51,6 +54,9 @@ describe('Graph', () => {
 
       expect(buffer).toBeInstanceOf(Buffer);
       expect(buffer.length).toBeGreaterThan(0);
+      expect(buffer.subarray(0, 8)).toEqual(
+        Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]),
+      );
     });
 
     it('should handle single contribution', async () => {
@@ -61,20 +67,26 @@ describe('Graph', () => {
 
       expect(buffer).toBeInstanceOf(Buffer);
       expect(buffer.length).toBeGreaterThan(0);
+      expect(buffer.subarray(0, 8)).toEqual(
+        Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]),
+      );
     });
 
     it('should sort contributions by date', async () => {
       const graph = new Graph();
-      const contributions = [
+      const unsortedContributions = [
         new Contribution(new Date('2025-01-03'), 7),
         new Contribution(new Date('2025-01-01'), 5),
         new Contribution(new Date('2025-01-02'), 3),
       ];
 
-      const buffer = await graph.generate(contributions);
+      const buffer = await graph.generate(unsortedContributions);
 
       expect(buffer).toBeInstanceOf(Buffer);
       expect(buffer.length).toBeGreaterThan(0);
+      expect(unsortedContributions[0].date).toEqual(new Date('2025-01-03'));
+      expect(unsortedContributions[1].date).toEqual(new Date('2025-01-01'));
+      expect(unsortedContributions[2].date).toEqual(new Date('2025-01-02'));
     });
 
     it('should calculate cumulative totals correctly', async () => {
@@ -89,6 +101,9 @@ describe('Graph', () => {
 
       expect(buffer).toBeInstanceOf(Buffer);
       expect(buffer.length).toBeGreaterThan(0);
+      expect(buffer.subarray(0, 8)).toEqual(
+        Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]),
+      );
     });
 
     it('should handle contributions with zero count', async () => {
@@ -103,6 +118,9 @@ describe('Graph', () => {
 
       expect(buffer).toBeInstanceOf(Buffer);
       expect(buffer.length).toBeGreaterThan(0);
+      expect(buffer.subarray(0, 8)).toEqual(
+        Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]),
+      );
     });
 
     it('should generate graph with different themes', async () => {
@@ -115,12 +133,16 @@ describe('Graph', () => {
 
         expect(buffer).toBeInstanceOf(Buffer);
         expect(buffer.length).toBeGreaterThan(0);
+        expect(buffer.subarray(0, 8)).toEqual(
+          Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]),
+        );
       }
     });
 
     it('should generate graph with different sizes', async () => {
       const sizes = ['small', 'medium', 'large'];
       const contributions = [new Contribution(new Date('2025-01-01'), 10)];
+      const buffers: Buffer[] = [];
 
       for (const size of sizes) {
         const graph = new Graph(undefined, size);
@@ -128,7 +150,14 @@ describe('Graph', () => {
 
         expect(buffer).toBeInstanceOf(Buffer);
         expect(buffer.length).toBeGreaterThan(0);
+        expect(buffer.subarray(0, 8)).toEqual(
+          Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]),
+        );
+        buffers.push(buffer);
       }
+
+      expect(buffers[0].length).not.toBe(buffers[1].length);
+      expect(buffers[1].length).not.toBe(buffers[2].length);
     });
   });
 });
