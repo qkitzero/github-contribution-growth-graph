@@ -72,7 +72,7 @@ describe('Graph', () => {
       );
     });
 
-    it('should sort contributions by date', async () => {
+    it('should not mutate the input contributions array', async () => {
       const graph = new Graph();
       const unsortedContributions = [
         new Contribution(new Date('2025-01-03'), 7),
