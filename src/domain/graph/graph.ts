@@ -53,6 +53,8 @@ export class Graph {
             label: 'Cumulative Contributions',
             data: values,
             borderColor: this.theme.lineColor,
+            backgroundColor: `${this.theme.lineColor}50`,
+            fill: true,
             tension: 0.1,
             pointRadius: 0,
           },
