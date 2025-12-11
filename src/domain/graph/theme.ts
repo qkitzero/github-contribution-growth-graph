@@ -19,13 +19,13 @@ export class Theme {
   readonly lineColor: string;
 
   private static readonly PRESET: Record<ThemeName, ThemePreset> = {
-    default: { background: 'transparent', line: '#4bc0c0ff' },
-    blue: { background: 'transparent', line: '#4bc0c0ff' },
-    red: { background: 'transparent', line: '#ff4444ff' },
-    green: { background: 'transparent', line: '#36a64fff' },
-    purple: { background: 'transparent', line: '#9966ffff' },
-    orange: { background: 'transparent', line: '#ff9933ff' },
-    pink: { background: 'transparent', line: '#ff6b9dff' },
+    default: { background: 'transparent', line: '#4bc0c0' },
+    blue: { background: 'transparent', line: '#4bc0c0' },
+    red: { background: 'transparent', line: '#ff4444' },
+    green: { background: 'transparent', line: '#36a64f' },
+    purple: { background: 'transparent', line: '#9966ff' },
+    orange: { background: 'transparent', line: '#ff9933' },
+    pink: { background: 'transparent', line: '#ff6b9d' },
     dark: { background: '#1a1a1a', line: '#ffffff' },
     light: { background: '#ffffff', line: '#1a1a1a' },
   } as const;
