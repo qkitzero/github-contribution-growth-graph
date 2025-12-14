@@ -1,3 +1,4 @@
+import { Contribution } from '../domain/contribution/contribution';
 import { Client as GitHubClient } from '../infrastructure/api/github/client';
 import { GraphUseCaseImpl } from './graphUseCase';
 
@@ -10,5 +11,36 @@ describe('GraphUseCase', () => {
     return { mockGitHubClient, graphUseCase };
   };
 
-  describe('createGraph', () => {});
+  describe('createGraph', () => {
+    beforeEach(() => {
+      jest.useFakeTimers();
+      jest.setSystemTime(new Date('2025-01-01T00:00:00.000Z'));
+    });
+
+    afterEach(() => {
+      jest.useRealTimers();
+    });
+
+    test('should create a graph with default dates', async () => {
+      const { mockGitHubClient, graphUseCase } = setup();
+
+      const to = new Date('2025-01-01T00:00:00.000Z');
+      const from = new Date('2024-01-01T00:00:00.000Z');
+
+      const mockContributions: Contribution[] = [
+        { date: new Date('2025-01-01'), count: 5 },
+        { date: new Date('2025-01-02'), count: 10 },
+      ];
+      mockGitHubClient.getContributions.mockResolvedValue(mockContributions);
+
+      const user = 'user';
+      await graphUseCase.createGraph(user);
+
+      expect(mockGitHubClient.getContributions).toHaveBeenCalledWith(
+        user,
+        from.toISOString(),
+        to.toISOString(),
+      );
+    });
+  });
 });
