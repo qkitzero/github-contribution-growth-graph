@@ -23,10 +23,12 @@ export class GraphUseCaseImpl implements GraphUseCase {
     size?: string,
   ): Promise<Buffer> {
     const now = new Date();
-    const toDate = to ? new Date(to) : now;
+    const toDate = to
+      ? new Date(to + 'T00:00:00Z')
+      : new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
     const fromDate = from
-      ? new Date(from)
-      : new Date(toDate.getFullYear() - 1, toDate.getMonth(), toDate.getDate());
+      ? new Date(from + 'T00:00:00Z')
+      : new Date(Date.UTC(toDate.getUTCFullYear() - 1, toDate.getUTCMonth(), toDate.getUTCDate()));
 
     const promises: Promise<Contribution[]>[] = [];
     let cursor = fromDate;
