@@ -1,11 +1,11 @@
 import { Router } from 'express';
 import { GraphUseCaseImpl } from '../application/graphUseCase';
-import { Client as GithubClient } from '../infrastructure/api/github/client';
+import { ClientImpl as GithubClientImpl } from '../infrastructure/api/github/client';
 import { GraphController } from '../interface/graphController';
 
 const router = Router();
 
-const githubClient = new GithubClient();
+const githubClient = new GithubClientImpl();
 
 const graphUseCase = new GraphUseCaseImpl(githubClient);
 

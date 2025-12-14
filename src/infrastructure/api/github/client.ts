@@ -16,7 +16,11 @@ type ContributionsResponse = {
   };
 };
 
-export class Client {
+export interface Client {
+  getContributions(userName: string, from: string, to: string): Promise<Contribution[]>;
+}
+
+export class ClientImpl implements Client {
   private client: GraphQLClient;
 
   constructor(token?: string) {
