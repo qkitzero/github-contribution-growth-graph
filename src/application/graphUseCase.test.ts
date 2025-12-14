@@ -25,16 +25,43 @@ describe('GraphUseCase', () => {
       const { mockGitHubClient, graphUseCase } = setup();
 
       const contributions: Contribution[] = [
-        { date: new Date('2025-01-01'), count: 5 },
-        { date: new Date('2025-01-02'), count: 10 },
+        { date: new Date('2024-01-01'), count: 5 },
+        { date: new Date('2024-01-02'), count: 10 },
       ];
       mockGitHubClient.getContributions.mockResolvedValue(contributions);
 
-      const user = 'user';
-      await graphUseCase.createGraph(user);
+      await graphUseCase.createGraph('test-user');
 
-      expect(mockGitHubClient.getContributions).toHaveBeenCalledWith(
-        user,
+      expect(mockGitHubClient.getContributions).toHaveBeenCalledTimes(1);
+      expect(mockGitHubClient.getContributions).toHaveBeenNthCalledWith(
+        1,
+        'test-user',
+        '2024-01-01T00:00:00.000Z',
+        '2025-01-01T00:00:00.000Z',
+      );
+    });
+
+    test('should create a graph with specified dates', async () => {
+      const { mockGitHubClient, graphUseCase } = setup();
+
+      const contributions: Contribution[] = [
+        { date: new Date('2024-01-01'), count: 5 },
+        { date: new Date('2024-01-02'), count: 10 },
+      ];
+      mockGitHubClient.getContributions.mockResolvedValue(contributions);
+
+      await graphUseCase.createGraph('test-user', '2023-01-01', '2025-01-01');
+
+      expect(mockGitHubClient.getContributions).toHaveBeenCalledTimes(2);
+      expect(mockGitHubClient.getContributions).toHaveBeenNthCalledWith(
+        1,
+        'test-user',
+        '2023-01-01T00:00:00.000Z',
+        '2024-01-01T00:00:00.000Z',
+      );
+      expect(mockGitHubClient.getContributions).toHaveBeenNthCalledWith(
+        2,
+        'test-user',
         '2024-01-01T00:00:00.000Z',
         '2025-01-01T00:00:00.000Z',
       );
