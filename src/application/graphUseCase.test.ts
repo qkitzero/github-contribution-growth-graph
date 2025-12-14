@@ -30,15 +30,13 @@ describe('GraphUseCase', () => {
       ];
       mockGitHubClient.getContributions.mockResolvedValue(contributions);
 
-      const from = new Date('2024-01-01T00:00:00.000Z');
-      const to = new Date('2025-01-01T00:00:00.000Z');
       const user = 'user';
       await graphUseCase.createGraph(user);
 
       expect(mockGitHubClient.getContributions).toHaveBeenCalledWith(
         user,
-        from.toISOString(),
-        to.toISOString(),
+        '2024-01-01T00:00:00.000Z',
+        '2025-01-01T00:00:00.000Z',
       );
     });
   });
