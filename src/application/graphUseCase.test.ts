@@ -24,15 +24,14 @@ describe('GraphUseCase', () => {
     test('should create a graph with default dates', async () => {
       const { mockGitHubClient, graphUseCase } = setup();
 
-      const to = new Date('2025-01-01T00:00:00.000Z');
-      const from = new Date('2024-01-01T00:00:00.000Z');
-
-      const mockContributions: Contribution[] = [
+      const contributions: Contribution[] = [
         { date: new Date('2025-01-01'), count: 5 },
         { date: new Date('2025-01-02'), count: 10 },
       ];
-      mockGitHubClient.getContributions.mockResolvedValue(mockContributions);
+      mockGitHubClient.getContributions.mockResolvedValue(contributions);
 
+      const from = new Date('2024-01-01T00:00:00.000Z');
+      const to = new Date('2025-01-01T00:00:00.000Z');
       const user = 'user';
       await graphUseCase.createGraph(user);
 
