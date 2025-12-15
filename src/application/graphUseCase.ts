@@ -41,11 +41,17 @@ export class GraphUseCaseImpl implements GraphUseCase {
       const startISO = cursor.toISOString();
       const endISO = rangeEnd.toISOString();
 
-      promises.push(this.githubClient.getContributions(user, startISO, endISO));
+      promises.push(this.githubClient.getContributionCalendar(user, startISO, endISO));
+      promises.push(this.githubClient.getIssueContributions(user, startISO, endISO));
+      promises.push(this.githubClient.getPullRequestContributions(user, startISO, endISO));
+      promises.push(this.githubClient.getPullRequestReviewContributions(user, startISO, endISO));
+      promises.push(this.githubClient.getRepositoryContributions(user, startISO, endISO));
+
       cursor = next;
     }
 
     const contributions = (await Promise.all(promises)).flat();
+    console.log(contributions);
 
     const graph = new Graph(theme, size);
 
