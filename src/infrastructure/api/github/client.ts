@@ -191,39 +191,6 @@ async function fetchAllPages<T>(
   return results;
 }
 
-function processContributions(
-  dates: Date[],
-  from: string,
-  to: string,
-  type: string,
-): Contribution[] {
-  const countsByDate = new Map<string, number>();
-
-  for (const date of dates) {
-    const key = date.toISOString().slice(0, 10);
-    countsByDate.set(key, (countsByDate.get(key) ?? 0) + 1);
-  }
-
-  const results: Contribution[] = [];
-
-  const current = new Date(from);
-  const end = new Date(to);
-
-  current.setUTCHours(0, 0, 0, 0);
-  end.setUTCHours(0, 0, 0, 0);
-
-  while (current <= end) {
-    const key = current.toISOString().slice(0, 10);
-    const count = countsByDate.get(key) ?? 0;
-
-    results.push(new Contribution(new Date(key), count, type));
-
-    current.setUTCDate(current.getUTCDate() + 1);
-  }
-
-  return results;
-}
-
 export interface Client {
   getContributionCalendar(userName: string, from: string, to: string): Promise<Contribution[]>;
   getIssueContributions(userName: string, from: string, to: string): Promise<Contribution[]>;
@@ -284,7 +251,27 @@ export class ClientImpl implements Client {
       };
     });
 
-    return processContributions(dates, from, to, 'issue');
+    const countsByDate = new Map<string, number>();
+    for (const date of dates) {
+      const key = date.toISOString().slice(0, 10);
+      countsByDate.set(key, (countsByDate.get(key) ?? 0) + 1);
+    }
+
+    const results: Contribution[] = [];
+    const current = new Date(from);
+    const end = new Date(to);
+
+    current.setUTCHours(0, 0, 0, 0);
+    end.setUTCHours(0, 0, 0, 0);
+
+    while (current <= end) {
+      const dateKey = current.toISOString().slice(0, 10);
+      const count = countsByDate.get(dateKey) ?? 0;
+      results.push(new Contribution(new Date(dateKey), count, 'issue'));
+      current.setUTCDate(current.getUTCDate() + 1);
+    }
+
+    return results;
   }
 
   async getPullRequestContributions(
@@ -313,7 +300,27 @@ export class ClientImpl implements Client {
       };
     });
 
-    return processContributions(dates, from, to, 'pull_request');
+    const countsByDate = new Map<string, number>();
+    for (const date of dates) {
+      const key = date.toISOString().slice(0, 10);
+      countsByDate.set(key, (countsByDate.get(key) ?? 0) + 1);
+    }
+
+    const results: Contribution[] = [];
+    const current = new Date(from);
+    const end = new Date(to);
+
+    current.setUTCHours(0, 0, 0, 0);
+    end.setUTCHours(0, 0, 0, 0);
+
+    while (current <= end) {
+      const dateKey = current.toISOString().slice(0, 10);
+      const count = countsByDate.get(dateKey) ?? 0;
+      results.push(new Contribution(new Date(dateKey), count, 'pull_request'));
+      current.setUTCDate(current.getUTCDate() + 1);
+    }
+
+    return results;
   }
 
   async getPullRequestReviewContributions(
@@ -342,7 +349,27 @@ export class ClientImpl implements Client {
       };
     });
 
-    return processContributions(dates, from, to, 'pull_request_review');
+    const countsByDate = new Map<string, number>();
+    for (const date of dates) {
+      const key = date.toISOString().slice(0, 10);
+      countsByDate.set(key, (countsByDate.get(key) ?? 0) + 1);
+    }
+
+    const results: Contribution[] = [];
+    const current = new Date(from);
+    const end = new Date(to);
+
+    current.setUTCHours(0, 0, 0, 0);
+    end.setUTCHours(0, 0, 0, 0);
+
+    while (current <= end) {
+      const dateKey = current.toISOString().slice(0, 10);
+      const count = countsByDate.get(dateKey) ?? 0;
+      results.push(new Contribution(new Date(dateKey), count, 'pull_request_review'));
+      current.setUTCDate(current.getUTCDate() + 1);
+    }
+
+    return results;
   }
 
   async getRepositoryContributions(
@@ -371,6 +398,26 @@ export class ClientImpl implements Client {
       };
     });
 
-    return processContributions(dates, from, to, 'repository');
+    const countsByDate = new Map<string, number>();
+    for (const date of dates) {
+      const key = date.toISOString().slice(0, 10);
+      countsByDate.set(key, (countsByDate.get(key) ?? 0) + 1);
+    }
+
+    const results: Contribution[] = [];
+    const current = new Date(from);
+    const end = new Date(to);
+
+    current.setUTCHours(0, 0, 0, 0);
+    end.setUTCHours(0, 0, 0, 0);
+
+    while (current <= end) {
+      const dateKey = current.toISOString().slice(0, 10);
+      const count = countsByDate.get(dateKey) ?? 0;
+      results.push(new Contribution(new Date(dateKey), count, 'repository'));
+      current.setUTCDate(current.getUTCDate() + 1);
+    }
+
+    return results;
   }
 }

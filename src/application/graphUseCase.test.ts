@@ -33,6 +33,10 @@ describe('GraphUseCase', () => {
         { date: new Date('2024-01-02'), count: 10, type: 'test' },
       ];
       mockGitHubClient.getContributionCalendar.mockResolvedValue(contributions);
+      mockGitHubClient.getIssueContributions.mockResolvedValue([]);
+      mockGitHubClient.getPullRequestContributions.mockResolvedValue([]);
+      mockGitHubClient.getPullRequestReviewContributions.mockResolvedValue([]);
+      mockGitHubClient.getRepositoryContributions.mockResolvedValue([]);
 
       await graphUseCase.createGraph('test-user');
 
@@ -53,6 +57,10 @@ describe('GraphUseCase', () => {
         { date: new Date('2024-01-02'), count: 10, type: 'test' },
       ];
       mockGitHubClient.getContributionCalendar.mockResolvedValue(contributions);
+      mockGitHubClient.getIssueContributions.mockResolvedValue([]);
+      mockGitHubClient.getPullRequestContributions.mockResolvedValue([]);
+      mockGitHubClient.getPullRequestReviewContributions.mockResolvedValue([]);
+      mockGitHubClient.getRepositoryContributions.mockResolvedValue([]);
 
       await graphUseCase.createGraph('test-user', '2023-01-01', '2025-01-01');
 

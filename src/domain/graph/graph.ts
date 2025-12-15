@@ -24,26 +24,6 @@ export class Graph {
   }
 
   async generate(contributions: Contribution[]): Promise<Buffer> {
-    // const sorted = [...contributions].sort((a, b) => a.date.getTime() - b.date.getTime());
-
-    // let runningTotal = 0;
-    // const totals = sorted.map((c) => {
-    //   runningTotal += c.count;
-    //   return {
-    //     date: c.date,
-    //     total: runningTotal,
-    //   };
-    // });
-
-    // const labels = totals.map((c) => {
-    //   const d = c.date;
-    //   const year = d.getFullYear();
-    //   const month = String(d.getMonth() + 1).padStart(2, '0');
-    //   return `${year}/${month}`;
-    // });
-
-    // const values = totals.map((c) => c.total);
-
     const byType = new Map<string, Contribution[]>();
 
     for (const c of contributions) {
@@ -84,41 +64,29 @@ export class Graph {
       return `${year}/${month}`;
     });
 
-    const typeColors: Record<string, string> = {
-      issue: '#4f46e5',
-      pull_request: '#16a34a',
-      pull_request_review: '#f59e0b',
-      repository: '#f5380b',
-      calender: '#562358',
-    };
-
-    const datasets = Array.from(seriesByType.entries()).map(([type, series]) => ({
-      label: type,
-      data: series.map((p) => p.total),
-      borderColor: typeColors[type] ?? '#999',
-      backgroundColor: `${typeColors[type] ?? '#999'}80`,
-      fill: true,
-      tension: 0.1,
-      pointRadius: 0,
-      stack: 'contributions',
-    }));
+    const typeOrder = ['commit', 'issue', 'pull_request', 'pull_request_review', 'repository'];
+    const datasets = typeOrder
+      .filter((type) => seriesByType.has(type))
+      .map((type) => {
+        const series = seriesByType.get(type)!;
+        const color = this.theme.getColorForType(type);
+        return {
+          label: type,
+          data: series.map((p) => p.total),
+          borderColor: color,
+          backgroundColor: `${color}80`,
+          fill: true,
+          tension: 0.1,
+          pointRadius: 0,
+          stack: 'contributions',
+        };
+      });
 
     const chartConfiguration: ChartConfiguration = {
       type: 'line',
       data: {
         labels,
         datasets,
-        // datasets: [
-        //   {
-        //     label: 'Cumulative Contributions',
-        //     data: values,
-        //     borderColor: this.theme.lineColor,
-        //     backgroundColor: `${this.theme.lineColor}50`,
-        //     fill: true,
-        //     tension: 0.1,
-        //     pointRadius: 0,
-        //   },
-        // ],
       },
       options: {
         scales: {
