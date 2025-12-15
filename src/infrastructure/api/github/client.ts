@@ -1,5 +1,5 @@
 import { gql, GraphQLClient } from 'graphql-request';
-import { Contribution } from '../../../domain/contribution/contribution';
+import { Contribution, ContributionType } from '../../../domain/contribution/contribution';
 
 type ContributionCalendarResponse = {
   user: {
@@ -16,69 +16,6 @@ type ContributionCalendarResponse = {
   };
 };
 
-type IssueContributionsResponse = {
-  user: {
-    contributionsCollection: {
-      issueContributions: {
-        nodes: {
-          occurredAt: string;
-        }[];
-        pageInfo: {
-          hasNextPage: boolean;
-          endCursor: string | null;
-        };
-      };
-    };
-  };
-};
-
-type PullRequestContributionsResponse = {
-  user: {
-    contributionsCollection: {
-      pullRequestContributions: {
-        nodes: {
-          occurredAt: string;
-        }[];
-        pageInfo: {
-          hasNextPage: boolean;
-          endCursor: string | null;
-        };
-      };
-    };
-  };
-};
-
-type PullRequestReviewContributionsResponse = {
-  user: {
-    contributionsCollection: {
-      pullRequestReviewContributions: {
-        nodes: {
-          occurredAt: string;
-        }[];
-        pageInfo: {
-          hasNextPage: boolean;
-          endCursor: string | null;
-        };
-      };
-    };
-  };
-};
-
-type RepositoryContributionsResponse = {
-  user: {
-    contributionsCollection: {
-      repositoryContributions: {
-        nodes: {
-          occurredAt: string;
-        }[];
-        pageInfo: {
-          hasNextPage: boolean;
-          endCursor: string | null;
-        };
-      };
-    };
-  };
-};
 
 const CONTRIBUTION_CALENDAR_QUERY = gql`
   query ($userName: String!, $from: DateTime!, $to: DateTime!) {
@@ -203,6 +140,19 @@ export interface Client {
   getRepositoryContributions(userName: string, from: string, to: string): Promise<Contribution[]>;
 }
 
+type ContributionConnection = {
+  nodes: { occurredAt: string }[];
+  pageInfo: PageInfo;
+};
+
+type PaginatedContributionResponse = {
+  user: {
+    contributionsCollection: {
+      [key: string]: ContributionConnection;
+    };
+  };
+};
+
 export class ClientImpl implements Client {
   private client: GraphQLClient;
 
@@ -232,16 +182,23 @@ export class ClientImpl implements Client {
     );
   }
 
-  async getIssueContributions(userName: string, from: string, to: string): Promise<Contribution[]> {
+  private async fetchContributions(
+    userName: string,
+    from: string,
+    to: string,
+    query: string,
+    contributionType: ContributionType,
+    responseKey: string,
+  ): Promise<Contribution[]> {
     const dates = await fetchAllPages<Date>(async (cursor) => {
-      const res = await this.client.request<IssueContributionsResponse>(ISSUE_CONTRIBUTIONS_QUERY, {
+      const res = await this.client.request<PaginatedContributionResponse>(query, {
         userName,
         from,
         to,
         cursor,
       });
 
-      const conn = res.user.contributionsCollection.issueContributions;
+      const conn = res.user.contributionsCollection[responseKey];
 
       return {
         nodes: conn.nodes
@@ -257,21 +214,20 @@ export class ClientImpl implements Client {
       countsByDate.set(key, (countsByDate.get(key) ?? 0) + 1);
     }
 
-    const results: Contribution[] = [];
-    const current = new Date(from);
-    const end = new Date(to);
+    return Array.from(countsByDate.entries()).map(
+      ([date, count]) => new Contribution(new Date(date), count, contributionType),
+    );
+  }
 
-    current.setUTCHours(0, 0, 0, 0);
-    end.setUTCHours(0, 0, 0, 0);
-
-    while (current <= end) {
-      const dateKey = current.toISOString().slice(0, 10);
-      const count = countsByDate.get(dateKey) ?? 0;
-      results.push(new Contribution(new Date(dateKey), count, 'issue'));
-      current.setUTCDate(current.getUTCDate() + 1);
-    }
-
-    return results;
+  async getIssueContributions(userName: string, from: string, to: string): Promise<Contribution[]> {
+    return this.fetchContributions(
+      userName,
+      from,
+      to,
+      ISSUE_CONTRIBUTIONS_QUERY,
+      'issue',
+      'issueContributions',
+    );
   }
 
   async getPullRequestContributions(
@@ -279,48 +235,14 @@ export class ClientImpl implements Client {
     from: string,
     to: string,
   ): Promise<Contribution[]> {
-    const dates = await fetchAllPages<Date>(async (cursor) => {
-      const res = await this.client.request<PullRequestContributionsResponse>(
-        PULL_REQUEST_CONTRIBUTIONS_QUERY,
-        {
-          userName,
-          from,
-          to,
-          cursor,
-        },
-      );
-
-      const conn = res.user.contributionsCollection.pullRequestContributions;
-
-      return {
-        nodes: conn.nodes
-          .filter((n): n is NonNullable<typeof n> => n !== null)
-          .map((n) => new Date(n.occurredAt)),
-        pageInfo: conn.pageInfo,
-      };
-    });
-
-    const countsByDate = new Map<string, number>();
-    for (const date of dates) {
-      const key = date.toISOString().slice(0, 10);
-      countsByDate.set(key, (countsByDate.get(key) ?? 0) + 1);
-    }
-
-    const results: Contribution[] = [];
-    const current = new Date(from);
-    const end = new Date(to);
-
-    current.setUTCHours(0, 0, 0, 0);
-    end.setUTCHours(0, 0, 0, 0);
-
-    while (current <= end) {
-      const dateKey = current.toISOString().slice(0, 10);
-      const count = countsByDate.get(dateKey) ?? 0;
-      results.push(new Contribution(new Date(dateKey), count, 'pull_request'));
-      current.setUTCDate(current.getUTCDate() + 1);
-    }
-
-    return results;
+    return this.fetchContributions(
+      userName,
+      from,
+      to,
+      PULL_REQUEST_CONTRIBUTIONS_QUERY,
+      'pull_request',
+      'pullRequestContributions',
+    );
   }
 
   async getPullRequestReviewContributions(
@@ -328,48 +250,14 @@ export class ClientImpl implements Client {
     from: string,
     to: string,
   ): Promise<Contribution[]> {
-    const dates = await fetchAllPages<Date>(async (cursor) => {
-      const res = await this.client.request<PullRequestReviewContributionsResponse>(
-        PULL_REQUEST_REVIEW_CONTRIBUTIONS_QUERY,
-        {
-          userName,
-          from,
-          to,
-          cursor,
-        },
-      );
-
-      const conn = res.user.contributionsCollection.pullRequestReviewContributions;
-
-      return {
-        nodes: conn.nodes
-          .filter((n): n is NonNullable<typeof n> => n !== null)
-          .map((n) => new Date(n.occurredAt)),
-        pageInfo: conn.pageInfo,
-      };
-    });
-
-    const countsByDate = new Map<string, number>();
-    for (const date of dates) {
-      const key = date.toISOString().slice(0, 10);
-      countsByDate.set(key, (countsByDate.get(key) ?? 0) + 1);
-    }
-
-    const results: Contribution[] = [];
-    const current = new Date(from);
-    const end = new Date(to);
-
-    current.setUTCHours(0, 0, 0, 0);
-    end.setUTCHours(0, 0, 0, 0);
-
-    while (current <= end) {
-      const dateKey = current.toISOString().slice(0, 10);
-      const count = countsByDate.get(dateKey) ?? 0;
-      results.push(new Contribution(new Date(dateKey), count, 'pull_request_review'));
-      current.setUTCDate(current.getUTCDate() + 1);
-    }
-
-    return results;
+    return this.fetchContributions(
+      userName,
+      from,
+      to,
+      PULL_REQUEST_REVIEW_CONTRIBUTIONS_QUERY,
+      'pull_request_review',
+      'pullRequestReviewContributions',
+    );
   }
 
   async getRepositoryContributions(
@@ -377,47 +265,14 @@ export class ClientImpl implements Client {
     from: string,
     to: string,
   ): Promise<Contribution[]> {
-    const dates = await fetchAllPages<Date>(async (cursor) => {
-      const res = await this.client.request<RepositoryContributionsResponse>(
-        REPOSITORY_CONTRIBUTIONS_QUERY,
-        {
-          userName,
-          from,
-          to,
-          cursor,
-        },
-      );
-
-      const conn = res.user.contributionsCollection.repositoryContributions;
-
-      return {
-        nodes: conn.nodes
-          .filter((n): n is NonNullable<typeof n> => n !== null)
-          .map((n) => new Date(n.occurredAt)),
-        pageInfo: conn.pageInfo,
-      };
-    });
-
-    const countsByDate = new Map<string, number>();
-    for (const date of dates) {
-      const key = date.toISOString().slice(0, 10);
-      countsByDate.set(key, (countsByDate.get(key) ?? 0) + 1);
-    }
-
-    const results: Contribution[] = [];
-    const current = new Date(from);
-    const end = new Date(to);
-
-    current.setUTCHours(0, 0, 0, 0);
-    end.setUTCHours(0, 0, 0, 0);
-
-    while (current <= end) {
-      const dateKey = current.toISOString().slice(0, 10);
-      const count = countsByDate.get(dateKey) ?? 0;
-      results.push(new Contribution(new Date(dateKey), count, 'repository'));
-      current.setUTCDate(current.getUTCDate() + 1);
-    }
-
-    return results;
+    return this.fetchContributions(
+      userName,
+      from,
+      to,
+      REPOSITORY_CONTRIBUTIONS_QUERY,
+      'repository',
+      'repositoryContributions',
+    );
   }
 }
+

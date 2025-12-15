@@ -32,9 +32,9 @@ describe('Graph', () => {
     it('should generate PNG buffer from contributions', async () => {
       const graph = new Graph();
       const contributions = [
-        new Contribution(new Date('2025-01-01'), 5, 'test'),
-        new Contribution(new Date('2025-01-02'), 3, 'test'),
-        new Contribution(new Date('2025-01-03'), 7, 'test'),
+        new Contribution(new Date('2025-01-01'), 5, 'commit'),
+        new Contribution(new Date('2025-01-02'), 3, 'commit'),
+        new Contribution(new Date('2025-01-03'), 7, 'commit'),
       ];
 
       const buffer = await graph.generate(contributions);
@@ -61,7 +61,7 @@ describe('Graph', () => {
 
     it('should handle single contribution', async () => {
       const graph = new Graph();
-      const contributions = [new Contribution(new Date('2025-01-01'), 10, 'test')];
+      const contributions = [new Contribution(new Date('2025-01-01'), 10, 'commit')];
 
       const buffer = await graph.generate(contributions);
 
@@ -75,9 +75,9 @@ describe('Graph', () => {
     it('should not mutate the input contributions array', async () => {
       const graph = new Graph();
       const unsortedContributions = [
-        new Contribution(new Date('2025-01-03'), 7, 'test'),
-        new Contribution(new Date('2025-01-01'), 5, 'test'),
-        new Contribution(new Date('2025-01-02'), 3, 'test'),
+        new Contribution(new Date('2025-01-03'), 7, 'commit'),
+        new Contribution(new Date('2025-01-01'), 5, 'commit'),
+        new Contribution(new Date('2025-01-02'), 3, 'commit'),
       ];
 
       const buffer = await graph.generate(unsortedContributions);
@@ -92,9 +92,9 @@ describe('Graph', () => {
     it('should calculate cumulative totals correctly', async () => {
       const graph = new Graph();
       const contributions = [
-        new Contribution(new Date('2025-01-01'), 5, 'test'),
-        new Contribution(new Date('2025-01-02'), 3, 'test'),
-        new Contribution(new Date('2025-01-03'), 7, 'test'),
+        new Contribution(new Date('2025-01-01'), 5, 'commit'),
+        new Contribution(new Date('2025-01-02'), 3, 'commit'),
+        new Contribution(new Date('2025-01-03'), 7, 'commit'),
       ];
 
       const buffer = await graph.generate(contributions);
@@ -109,9 +109,9 @@ describe('Graph', () => {
     it('should handle contributions with zero count', async () => {
       const graph = new Graph();
       const contributions = [
-        new Contribution(new Date('2025-01-01'), 0, 'test'),
-        new Contribution(new Date('2025-01-02'), 5, 'test'),
-        new Contribution(new Date('2025-01-03'), 0, 'test'),
+        new Contribution(new Date('2025-01-01'), 0, 'commit'),
+        new Contribution(new Date('2025-01-02'), 5, 'commit'),
+        new Contribution(new Date('2025-01-03'), 0, 'commit'),
       ];
 
       const buffer = await graph.generate(contributions);
@@ -125,7 +125,7 @@ describe('Graph', () => {
 
     it('should generate graph with different themes', async () => {
       const themes = ['default', 'red', 'green', 'dark', 'light'];
-      const contributions = [new Contribution(new Date('2025-01-01'), 10, 'test')];
+      const contributions = [new Contribution(new Date('2025-01-01'), 10, 'commit')];
 
       for (const theme of themes) {
         const graph = new Graph(theme);
@@ -141,7 +141,7 @@ describe('Graph', () => {
 
     it('should generate graph with different sizes', async () => {
       const sizes = ['small', 'medium', 'large'];
-      const contributions = [new Contribution(new Date('2025-01-01'), 10, 'test')];
+      const contributions = [new Contribution(new Date('2025-01-01'), 10, 'commit')];
       const buffers: Buffer[] = [];
 
       for (const size of sizes) {

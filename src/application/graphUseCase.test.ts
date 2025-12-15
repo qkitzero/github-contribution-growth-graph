@@ -28,11 +28,10 @@ describe('GraphUseCase', () => {
     test('should create a graph with default dates', async () => {
       const { mockGitHubClient, graphUseCase } = setup();
 
-      const contributions: Contribution[] = [
-        { date: new Date('2024-01-01'), count: 5, type: 'test' },
-        { date: new Date('2024-01-02'), count: 10, type: 'test' },
-      ];
-      mockGitHubClient.getContributionCalendar.mockResolvedValue(contributions);
+      mockGitHubClient.getContributionCalendar.mockResolvedValue([
+        new Contribution(new Date('2024-01-01'), 5, 'calendar'),
+        new Contribution(new Date('2024-01-02'), 10, 'calendar'),
+      ]);
       mockGitHubClient.getIssueContributions.mockResolvedValue([]);
       mockGitHubClient.getPullRequestContributions.mockResolvedValue([]);
       mockGitHubClient.getPullRequestReviewContributions.mockResolvedValue([]);
@@ -52,11 +51,10 @@ describe('GraphUseCase', () => {
     test('should create a graph with specified dates', async () => {
       const { mockGitHubClient, graphUseCase } = setup();
 
-      const contributions: Contribution[] = [
-        { date: new Date('2024-01-01'), count: 5, type: 'test' },
-        { date: new Date('2024-01-02'), count: 10, type: 'test' },
-      ];
-      mockGitHubClient.getContributionCalendar.mockResolvedValue(contributions);
+      mockGitHubClient.getContributionCalendar.mockResolvedValue([
+        new Contribution(new Date('2024-01-01'), 5, 'calendar'),
+        new Contribution(new Date('2024-01-02'), 10, 'calendar'),
+      ]);
       mockGitHubClient.getIssueContributions.mockResolvedValue([]);
       mockGitHubClient.getPullRequestContributions.mockResolvedValue([]);
       mockGitHubClient.getPullRequestReviewContributions.mockResolvedValue([]);
