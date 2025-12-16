@@ -16,7 +16,6 @@ type ContributionCalendarResponse = {
   };
 };
 
-
 const CONTRIBUTION_CALENDAR_QUERY = gql`
   query ($userName: String!, $from: DateTime!, $to: DateTime!) {
     user(login: $userName) {
@@ -275,4 +274,3 @@ export class ClientImpl implements Client {
     );
   }
 }
-
