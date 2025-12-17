@@ -24,6 +24,18 @@ export class Graph {
   }
 
   async generate(contributions: Contribution[]): Promise<Buffer> {
+    if (contributions.length === 0) {
+      return this.chartJSNodeCanvas.renderToBuffer({
+        type: 'line',
+        data: { labels: [], datasets: [] },
+        options: {
+          plugins: {
+            title: { display: true, text: 'No contributions found' },
+          },
+        },
+      });
+    }
+
     const byType = new Map<string, Contribution[]>();
 
     for (const c of contributions) {
@@ -64,7 +76,7 @@ export class Graph {
       return `${year}/${month}`;
     });
 
-    const typeOrder = ['commit', 'issue', 'pull_request', 'pull_request_review', 'repository'];
+    const typeOrder = ['commit', 'issue', 'pull_request', 'pull_request_review'];
     const datasets = typeOrder
       .filter((type) => seriesByType.has(type))
       .map((type) => {

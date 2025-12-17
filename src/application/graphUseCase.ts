@@ -1,4 +1,4 @@
-import { Contribution, ContributionType } from '../domain/contribution/contribution';
+import { Contribution } from '../domain/contribution/contribution';
 import { Graph } from '../domain/graph/graph';
 import { Client as GitHubClient } from '../infrastructure/api/github/client';
 
@@ -41,11 +41,10 @@ export class GraphUseCaseImpl implements GraphUseCase {
       const startISO = cursor.toISOString();
       const endISO = rangeEnd.toISOString();
 
-      promises.push(this.githubClient.getContributionCalendar(user, startISO, endISO));
+      promises.push(this.githubClient.getCommitContributionsByRepository(user, startISO, endISO));
       promises.push(this.githubClient.getIssueContributions(user, startISO, endISO));
       promises.push(this.githubClient.getPullRequestContributions(user, startISO, endISO));
       promises.push(this.githubClient.getPullRequestReviewContributions(user, startISO, endISO));
-      promises.push(this.githubClient.getRepositoryContributions(user, startISO, endISO));
 
       cursor = next;
     }
@@ -59,4 +58,3 @@ export class GraphUseCaseImpl implements GraphUseCase {
     return graph.generate(finalContributions);
   }
 }
-
