@@ -44,6 +44,10 @@ export class ClientImpl implements Client {
   }
 
   async getTotalContributions(userName: string, from: string, to: string): Promise<Contribution[]> {
+    if (this.requestDelay > 0) {
+      await new Promise((resolve) => setTimeout(resolve, this.requestDelay));
+    }
+
     const res = await this.client.request<TotalContributionsResponse>(TOTAL_CONTRIBUTIONS_QUERY, {
       userName,
       from,
