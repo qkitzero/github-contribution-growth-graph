@@ -69,11 +69,13 @@ export class GraphUseCaseImpl implements GraphUseCase {
   }
 
   private async fetchAllContributions(user: string, ranges: DateRange[]): Promise<Contribution[]> {
-    const promises = ranges.map((range) =>
-      this.githubClient.getTotalContributions(user, range.from, range.to),
-    );
+    const results: Contribution[] = [];
 
-    const results = await Promise.all(promises);
-    return results.flat();
+    for (const range of ranges) {
+      const contributions = await this.githubClient.getTotalContributions(user, range.from, range.to);
+      results.push(...contributions);
+    }
+
+    return results;
   }
 }
