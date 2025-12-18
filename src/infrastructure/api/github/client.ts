@@ -31,7 +31,6 @@ export interface Client {
 
 export class ClientImpl implements Client {
   private client: GraphQLClient;
-  private readonly requestDelay: number;
 
   constructor(token?: string, requestDelay: number = 0) {
     const githubToken = token || process.env.GITHUB_TOKEN;
@@ -40,14 +39,9 @@ export class ClientImpl implements Client {
         authorization: `Bearer ${githubToken}`,
       },
     });
-    this.requestDelay = requestDelay;
   }
 
   async getTotalContributions(userName: string, from: string, to: string): Promise<Contribution[]> {
-    if (this.requestDelay > 0) {
-      await new Promise((resolve) => setTimeout(resolve, this.requestDelay));
-    }
-
     const res = await this.client.request<TotalContributionsResponse>(TOTAL_CONTRIBUTIONS_QUERY, {
       userName,
       from,
@@ -66,7 +60,12 @@ export class ClientImpl implements Client {
       new Contribution(fromDate, toDate, totalCommitContributions, 'commit'),
       new Contribution(fromDate, toDate, totalIssueContributions, 'issue'),
       new Contribution(fromDate, toDate, totalPullRequestContributions, 'pull_request'),
-      new Contribution(fromDate, toDate, totalPullRequestReviewContributions, 'pull_request_review'),
+      new Contribution(
+        fromDate,
+        toDate,
+        totalPullRequestReviewContributions,
+        'pull_request_review',
+      ),
     ];
   }
 }

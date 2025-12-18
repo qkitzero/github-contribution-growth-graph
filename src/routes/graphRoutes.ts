@@ -5,10 +5,7 @@ import { GraphController } from '../interface/graphController';
 
 const router = Router();
 
-const githubClient = new GithubClientImpl(
-  process.env.GITHUB_TOKEN,
-  Number(process.env.GITHUB_REQUEST_DELAY) || 0,
-);
+const githubClient = new GithubClientImpl(process.env.GITHUB_TOKEN);
 
 const graphUseCase = new GraphUseCaseImpl(githubClient);
 
