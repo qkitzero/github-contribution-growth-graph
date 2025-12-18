@@ -1,10 +1,20 @@
 import { ChartConfiguration } from 'chart.js';
 import { ChartJSNodeCanvas } from 'chartjs-node-canvas';
-import { Contribution } from '../contribution/contribution';
+import {
+  AggregatedContributions,
+  Contribution,
+  Contributions,
+} from '../contribution/contribution';
 import { Size } from './size';
 import { Theme } from './theme';
 
 export class Graph {
+  private static readonly CHART_DEFAULTS = {
+    TENSION: 0.1,
+    POINT_RADIUS: 0,
+    BACKGROUND_ALPHA: '80',
+  } as const;
+
   private chartJSNodeCanvas: ChartJSNodeCanvas;
   private theme: Theme;
   private size: Size;
@@ -24,46 +34,71 @@ export class Graph {
   }
 
   async generate(contributions: Contribution[]): Promise<Buffer> {
-    const sorted = [...contributions].sort((a, b) => a.date.getTime() - b.date.getTime());
+    const contributionsCollection = new Contributions(contributions);
 
-    let runningTotal = 0;
-    const totals = sorted.map((c) => {
-      runningTotal += c.count;
+    if (contributionsCollection.isEmpty) {
+      return this.generateEmptyChart();
+    }
+
+    const aggregated = contributionsCollection.aggregate();
+    const periods = contributionsCollection.getAllPeriods(aggregated);
+    const datasets = this.createDatasets(contributionsCollection, aggregated, periods);
+    const chartConfiguration = this.createChartConfiguration(periods, datasets);
+
+    return await this.chartJSNodeCanvas.renderToBuffer(chartConfiguration);
+  }
+
+  private generateEmptyChart(): Promise<Buffer> {
+    return this.chartJSNodeCanvas.renderToBuffer({
+      type: 'line',
+      data: { labels: [], datasets: [] },
+      options: {
+        plugins: {
+          title: { display: true, text: 'No contributions found' },
+        },
+      },
+    });
+  }
+
+  private createDatasets(
+    contributions: Contributions,
+    aggregated: AggregatedContributions,
+    periods: string[],
+  ) {
+    const orderedTypes = contributions.getOrderedTypes(aggregated);
+
+    return orderedTypes.map((type) => {
+      const periodData = aggregated.get(type)!;
+      const color = this.theme.getColorForType(type);
+      const cumulativeData = contributions.calculateCumulative(periodData, periods);
+
       return {
-        date: c.date,
-        total: runningTotal,
+        label: type,
+        data: cumulativeData,
+        borderColor: color,
+        backgroundColor: `${color}${Graph.CHART_DEFAULTS.BACKGROUND_ALPHA}`,
+        fill: true,
+        tension: Graph.CHART_DEFAULTS.TENSION,
+        pointRadius: Graph.CHART_DEFAULTS.POINT_RADIUS,
+        stack: 'contributions',
       };
     });
+  }
 
-    const labels = totals.map((c) => {
-      const d = c.date;
-      const year = d.getFullYear();
-      const month = String(d.getMonth() + 1).padStart(2, '0');
-      return `${year}/${month}`;
-    });
-
-    const values = totals.map((c) => c.total);
-
-    const chartConfiguration: ChartConfiguration = {
+  private createChartConfiguration(
+    labels: string[],
+    datasets: ReturnType<typeof this.createDatasets>,
+  ): ChartConfiguration {
+    return {
       type: 'line',
       data: {
         labels,
-        datasets: [
-          {
-            label: 'Cumulative Contributions',
-            data: values,
-            borderColor: this.theme.lineColor,
-            backgroundColor: `${this.theme.lineColor}50`,
-            fill: true,
-            tension: 0.1,
-            pointRadius: 0,
-          },
-        ],
+        datasets,
       },
       options: {
         scales: {
           x: {
-            title: { display: false, text: 'Date' },
+            title: { display: false, text: 'Period' },
           },
           y: {
             title: { display: false, text: 'Cumulative Contributions' },
@@ -76,7 +111,5 @@ export class Graph {
         },
       },
     };
-
-    return await this.chartJSNodeCanvas.renderToBuffer(chartConfiguration);
   }
 }

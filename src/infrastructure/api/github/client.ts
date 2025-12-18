@@ -1,74 +1,68 @@
 import { gql, GraphQLClient } from 'graphql-request';
 import { Contribution } from '../../../domain/contribution/contribution';
 
-type ContributionsResponse = {
+const TOTAL_CONTRIBUTIONS_QUERY = gql`
+  query ($userName: String!, $from: DateTime!, $to: DateTime!) {
+    user(login: $userName) {
+      contributionsCollection(from: $from, to: $to) {
+        totalCommitContributions
+        totalIssueContributions
+        totalPullRequestContributions
+        totalPullRequestReviewContributions
+      }
+    }
+  }
+`;
+
+type TotalContributionsResponse = {
   user: {
     contributionsCollection: {
-      contributionCalendar: {
-        weeks: {
-          contributionDays: {
-            contributionCount: number;
-            date: string;
-          }[];
-        }[];
-      };
+      totalCommitContributions: number;
+      totalIssueContributions: number;
+      totalPullRequestContributions: number;
+      totalPullRequestReviewContributions: number;
     };
   };
 };
 
 export interface Client {
-  getContributions(userName: string, from: string, to: string): Promise<Contribution[]>;
+  getTotalContributions(userName: string, from: string, to: string): Promise<Contribution[]>;
 }
 
 export class ClientImpl implements Client {
   private client: GraphQLClient;
+  private readonly requestDelay: number;
 
-  constructor(token?: string) {
+  constructor(token?: string, requestDelay: number = 0) {
     const githubToken = token || process.env.GITHUB_TOKEN;
     this.client = new GraphQLClient('https://api.github.com/graphql', {
       headers: {
         authorization: `Bearer ${githubToken}`,
       },
     });
+    this.requestDelay = requestDelay;
   }
 
-  async getContributions(userName: string, from: string, to: string): Promise<Contribution[]> {
-    const query = gql`
-      query ($userName: String!, $from: DateTime!, $to: DateTime!) {
-        user(login: $userName) {
-          contributionsCollection(from: $from, to: $to) {
-            contributionCalendar {
-              weeks {
-                contributionDays {
-                  contributionCount
-                  date
-                }
-              }
-            }
-          }
-        }
-      }
-    `;
-
-    const variables = {
+  async getTotalContributions(userName: string, from: string, to: string): Promise<Contribution[]> {
+    const res = await this.client.request<TotalContributionsResponse>(TOTAL_CONTRIBUTIONS_QUERY, {
       userName,
       from,
       to,
-    };
+    });
+    const {
+      totalCommitContributions,
+      totalIssueContributions,
+      totalPullRequestContributions,
+      totalPullRequestReviewContributions,
+    } = res.user.contributionsCollection;
 
-    const contributionsResponse = await this.client.request<ContributionsResponse>(
-      query,
-      variables,
-    );
-
-    const contributions =
-      contributionsResponse.user.contributionsCollection.contributionCalendar.weeks.flatMap(
-        (week) =>
-          week.contributionDays.map(
-            (day) => new Contribution(new Date(day.date), day.contributionCount),
-          ),
-      );
-
-    return contributions;
+    const fromDate = new Date(from);
+    const toDate = new Date(to);
+    return [
+      new Contribution(fromDate, toDate, totalCommitContributions, 'commit'),
+      new Contribution(fromDate, toDate, totalIssueContributions, 'issue'),
+      new Contribution(fromDate, toDate, totalPullRequestContributions, 'pull_request'),
+      new Contribution(fromDate, toDate, totalPullRequestReviewContributions, 'pull_request_review'),
+    ];
   }
 }

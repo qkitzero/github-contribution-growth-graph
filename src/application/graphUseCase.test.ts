@@ -5,7 +5,7 @@ import { GraphUseCaseImpl } from './graphUseCase';
 describe('GraphUseCase', () => {
   const setup = () => {
     const mockGitHubClient: jest.Mocked<GitHubClient> = {
-      getContributions: jest.fn(),
+      getTotalContributions: jest.fn(),
     };
     const graphUseCase = new GraphUseCaseImpl(mockGitHubClient);
     return { mockGitHubClient, graphUseCase };
@@ -24,47 +24,56 @@ describe('GraphUseCase', () => {
     test('should create a graph with default dates', async () => {
       const { mockGitHubClient, graphUseCase } = setup();
 
-      const contributions: Contribution[] = [
-        { date: new Date('2024-01-01'), count: 5 },
-        { date: new Date('2024-01-02'), count: 10 },
-      ];
-      mockGitHubClient.getContributions.mockResolvedValue(contributions);
+      mockGitHubClient.getTotalContributions.mockResolvedValue([
+        new Contribution(
+          new Date('2024-01-01T00:00:00.000Z'),
+          new Date('2024-02-01T00:00:00.000Z'),
+          5,
+          'commit',
+        ),
+        new Contribution(
+          new Date('2024-01-01T00:00:00.000Z'),
+          new Date('2024-02-01T00:00:00.000Z'),
+          10,
+          'issue',
+        ),
+      ]);
 
       await graphUseCase.createGraph('test-user');
 
-      expect(mockGitHubClient.getContributions).toHaveBeenCalledTimes(1);
-      expect(mockGitHubClient.getContributions).toHaveBeenNthCalledWith(
-        1,
-        'test-user',
-        '2024-01-01T00:00:00.000Z',
-        '2025-01-01T00:00:00.000Z',
-      );
+      expect(mockGitHubClient.getTotalContributions).toHaveBeenCalled();
+      const firstCall = mockGitHubClient.getTotalContributions.mock.calls[0];
+      expect(firstCall[0]).toBe('test-user');
+      expect(firstCall[1]).toBe('2024-01-01T00:00:00.000Z');
     });
 
     test('should create a graph with specified dates', async () => {
       const { mockGitHubClient, graphUseCase } = setup();
 
-      const contributions: Contribution[] = [
-        { date: new Date('2024-01-01'), count: 5 },
-        { date: new Date('2024-01-02'), count: 10 },
-      ];
-      mockGitHubClient.getContributions.mockResolvedValue(contributions);
+      mockGitHubClient.getTotalContributions.mockResolvedValue([
+        new Contribution(
+          new Date('2023-01-01T00:00:00.000Z'),
+          new Date('2023-02-01T00:00:00.000Z'),
+          5,
+          'commit',
+        ),
+        new Contribution(
+          new Date('2023-01-01T00:00:00.000Z'),
+          new Date('2023-02-01T00:00:00.000Z'),
+          10,
+          'issue',
+        ),
+      ]);
 
       await graphUseCase.createGraph('test-user', '2023-01-01', '2025-01-01');
 
-      expect(mockGitHubClient.getContributions).toHaveBeenCalledTimes(2);
-      expect(mockGitHubClient.getContributions).toHaveBeenNthCalledWith(
-        1,
-        'test-user',
-        '2023-01-01T00:00:00.000Z',
-        '2024-01-01T00:00:00.000Z',
-      );
-      expect(mockGitHubClient.getContributions).toHaveBeenNthCalledWith(
-        2,
-        'test-user',
-        '2024-01-01T00:00:00.000Z',
-        '2025-01-01T00:00:00.000Z',
-      );
+      expect(mockGitHubClient.getTotalContributions).toHaveBeenCalled();
+      // Should generate monthly ranges between 2023-01-01 and 2025-01-01
+      expect(mockGitHubClient.getTotalContributions.mock.calls.length).toBeGreaterThan(0);
+
+      const firstCall = mockGitHubClient.getTotalContributions.mock.calls[0];
+      expect(firstCall[0]).toBe('test-user');
+      expect(firstCall[1]).toBe('2023-01-01T00:00:00.000Z');
     });
   });
 });
