@@ -32,7 +32,7 @@ export interface Client {
 export class ClientImpl implements Client {
   private client: GraphQLClient;
 
-  constructor(token?: string, requestDelay: number = 0) {
+  constructor(token?: string) {
     const githubToken = token || process.env.GITHUB_TOKEN;
     this.client = new GraphQLClient('https://api.github.com/graphql', {
       headers: {
