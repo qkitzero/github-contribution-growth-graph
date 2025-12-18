@@ -3,7 +3,7 @@ import { Graph } from '../domain/graph/graph';
 import { Client as GitHubClient } from '../infrastructure/api/github/client';
 
 export interface GraphUseCase {
-  createGraph(
+  createContributionsGraph(
     user: string,
     from?: string,
     to?: string,
@@ -12,16 +12,30 @@ export interface GraphUseCase {
   ): Promise<Buffer>;
 }
 
+type DateRange = {
+  from: string;
+  to: string;
+};
+
 export class GraphUseCaseImpl implements GraphUseCase {
   constructor(private readonly githubClient: GitHubClient) {}
 
-  async createGraph(
+  async createContributionsGraph(
     user: string,
     from?: string,
     to?: string,
     theme?: string,
     size?: string,
   ): Promise<Buffer> {
+    const { fromDate, toDate } = this.calculateDateRange(from, to);
+    const monthlyRanges = this.generateMonthlyRanges(fromDate, toDate);
+    const contributions = await this.fetchAllContributions(user, monthlyRanges);
+
+    const graph = new Graph(theme, size);
+    return graph.generate(contributions);
+  }
+
+  private calculateDateRange(from?: string, to?: string): { fromDate: Date; toDate: Date } {
     const now = new Date();
     const toDate = to
       ? new Date(to + 'T00:00:00Z')
@@ -30,25 +44,38 @@ export class GraphUseCaseImpl implements GraphUseCase {
       ? new Date(from + 'T00:00:00Z')
       : new Date(Date.UTC(toDate.getUTCFullYear() - 1, toDate.getUTCMonth(), toDate.getUTCDate()));
 
-    const promises: Promise<Contribution[]>[] = [];
-    let cursor = fromDate;
+    return { fromDate, toDate };
+  }
 
-    while (cursor < toDate) {
-      const next = new Date(cursor);
-      next.setFullYear(cursor.getFullYear() + 1);
+  private generateMonthlyRanges(fromDate: Date, toDate: Date): DateRange[] {
+    const ranges: DateRange[] = [];
+    let currentDate = fromDate;
 
-      const rangeEnd = next < toDate ? next : toDate;
-      const startISO = cursor.toISOString();
-      const endISO = rangeEnd.toISOString();
+    while (currentDate < toDate) {
+      const nextMonth = new Date(currentDate);
+      nextMonth.setUTCMonth(currentDate.getUTCMonth() + 1);
 
-      promises.push(this.githubClient.getContributions(user, startISO, endISO));
-      cursor = next;
+      const rangeEnd = nextMonth < toDate ? nextMonth : toDate;
+
+      ranges.push({
+        from: currentDate.toISOString(),
+        to: rangeEnd.toISOString(),
+      });
+
+      currentDate = nextMonth;
     }
 
-    const contributions = (await Promise.all(promises)).flat();
+    return ranges;
+  }
 
-    const graph = new Graph(theme, size);
+  private async fetchAllContributions(user: string, ranges: DateRange[]): Promise<Contribution[]> {
+    const results: Contribution[] = [];
 
-    return graph.generate(contributions);
+    for (const range of ranges) {
+      const contributions = await this.githubClient.getTotalContributions(user, range.from, range.to);
+      results.push(...contributions);
+    }
+
+    return results;
   }
 }

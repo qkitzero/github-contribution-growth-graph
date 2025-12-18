@@ -6,7 +6,7 @@ const app = express();
 const port = process.env.PORT || 8000;
 
 app.use(express.json());
-app.use('/graphs', graphRoutes);
+app.use('/graph', graphRoutes);
 
 app.use(ErrorMiddleware.handle);
 

@@ -5,12 +5,15 @@ import { GraphController } from '../interface/graphController';
 
 const router = Router();
 
-const githubClient = new GithubClientImpl();
+const githubClient = new GithubClientImpl(
+  process.env.GITHUB_TOKEN,
+  Number(process.env.GITHUB_REQUEST_DELAY) || 0,
+);
 
 const graphUseCase = new GraphUseCaseImpl(githubClient);
 
 const graphController = new GraphController(graphUseCase);
 
-router.get('/', graphController.getGraph);
+router.get('/contributions', graphController.getContributionsGraph);
 
 export default router;

@@ -5,13 +5,13 @@ import { GraphController } from './graphController';
 describe('GraphController', () => {
   const setup = () => {
     const mockGraphUseCase: jest.Mocked<GraphUseCase> = {
-      createGraph: jest.fn(),
+      createContributionsGraph: jest.fn(),
     };
     const graphController = new GraphController(mockGraphUseCase);
     return { mockGraphUseCase, graphController };
   };
 
-  describe('getGraph', () => {
+  describe('getContributionsGraph', () => {
     it('should create a graph and return 200 with image/png content type', async () => {
       const { mockGraphUseCase, graphController } = setup();
 
@@ -32,11 +32,11 @@ describe('GraphController', () => {
       } as unknown as Response;
 
       const mockGraphBuffer = Buffer.from('mock graph data');
-      mockGraphUseCase.createGraph.mockResolvedValue(mockGraphBuffer);
+      mockGraphUseCase.createContributionsGraph.mockResolvedValue(mockGraphBuffer);
 
-      await graphController.getGraph(req, res);
+      await graphController.getContributionsGraph(req, res);
 
-      expect(mockGraphUseCase.createGraph).toHaveBeenCalledWith(
+      expect(mockGraphUseCase.createContributionsGraph).toHaveBeenCalledWith(
         'testuser',
         '2025-01-01',
         '2025-12-31',
