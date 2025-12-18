@@ -1,3 +1,5 @@
+import { ContributionType } from '../contribution/contribution';
+
 type ThemeName =
   | 'default'
   | 'blue'
@@ -10,10 +12,8 @@ type ThemeName =
   | 'light';
 
 type ContributionTypeColors = {
-  commit: string;
-  issue: string;
-  pull_request: string;
-  pull_request_review: string;
+  [K in ContributionType]: string;
+} & {
   repository: string;
 };
 
@@ -139,7 +139,7 @@ export class Theme {
     this.typeColors = preset.typeColors;
   }
 
-  getColorForType(type: string): string {
-    return this.typeColors[type as keyof ContributionTypeColors] ?? '#999999';
+  getColorForType(type: ContributionType): string {
+    return this.typeColors[type] ?? '#999999';
   }
 }
