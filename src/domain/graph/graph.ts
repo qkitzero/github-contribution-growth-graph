@@ -36,55 +36,53 @@ export class Graph {
       });
     }
 
-    const byType = new Map<string, Contribution[]>();
+    // Group contributions by type and period (year/month)
+    type PeriodKey = string; // Format: "YYYY/MM"
+    type PeriodData = Map<PeriodKey, number>; // period -> total count for that period
+
+    const byTypeAndPeriod = new Map<string, PeriodData>();
 
     for (const c of contributions) {
-      if (!byType.has(c.type)) {
-        byType.set(c.type, []);
-      }
-      byType.get(c.type)!.push(c);
-    }
+      const year = c.from.getFullYear();
+      const month = String(c.from.getMonth() + 1).padStart(2, '0');
+      const periodKey: PeriodKey = `${year}/${month}`;
 
-    const dates = Array.from(new Set(contributions.map((c) => c.date.getTime())))
-      .sort((a, b) => a - b)
-      .map((t) => new Date(t));
-
-    type SeriesPoint = { date: Date; total: number };
-
-    const seriesByType = new Map<string, SeriesPoint[]>();
-
-    for (const [type, list] of byType) {
-      const sorted = [...list].sort((a, b) => a.date.getTime() - b.date.getTime());
-
-      let runningTotal = 0;
-      const result: SeriesPoint[] = [];
-
-      for (const d of dates) {
-        const todays = sorted.filter((c) => c.date.getTime() === d.getTime());
-        const dailySum = todays.reduce((s, c) => s + c.count, 0);
-        runningTotal += dailySum;
-
-        result.push({ date: d, total: runningTotal });
+      if (!byTypeAndPeriod.has(c.type)) {
+        byTypeAndPeriod.set(c.type, new Map());
       }
 
-      seriesByType.set(type, result);
+      const periodData = byTypeAndPeriod.get(c.type)!;
+      const currentTotal = periodData.get(periodKey) || 0;
+      periodData.set(periodKey, currentTotal + c.totalCount);
     }
 
-    const labels = dates.map((d) => {
-      const year = d.getFullYear();
-      const month = String(d.getMonth() + 1).padStart(2, '0');
-      return `${year}/${month}`;
-    });
+    // Get all unique periods sorted chronologically
+    const allPeriods = new Set<PeriodKey>();
+    for (const periodData of byTypeAndPeriod.values()) {
+      for (const period of periodData.keys()) {
+        allPeriods.add(period);
+      }
+    }
+
+    const labels = Array.from(allPeriods).sort();
 
     const typeOrder = ['commit', 'issue', 'pull_request', 'pull_request_review'];
     const datasets = typeOrder
-      .filter((type) => seriesByType.has(type))
+      .filter((type) => byTypeAndPeriod.has(type))
       .map((type) => {
-        const series = seriesByType.get(type)!;
+        const periodData = byTypeAndPeriod.get(type)!;
         const color = this.theme.getColorForType(type);
+
+        // Calculate cumulative totals for each period
+        let cumulative = 0;
+        const data = labels.map((period) => {
+          cumulative += periodData.get(period) || 0;
+          return cumulative;
+        });
+
         return {
           label: type,
-          data: series.map((p) => p.total),
+          data,
           borderColor: color,
           backgroundColor: `${color}80`,
           fill: true,
@@ -103,7 +101,7 @@ export class Graph {
       options: {
         scales: {
           x: {
-            title: { display: false, text: 'Date' },
+            title: { display: false, text: 'Period' },
           },
           y: {
             title: { display: false, text: 'Cumulative Contributions' },
