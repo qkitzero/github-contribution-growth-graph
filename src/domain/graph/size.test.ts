@@ -19,8 +19,8 @@ describe('Size', () => {
     it('should use small size', () => {
       const size = new Size('small');
 
-      expect(size.width).toBe(600);
-      expect(size.height).toBe(300);
+      expect(size.width).toBe(700);
+      expect(size.height).toBe(350);
     });
 
     it('should use large size', () => {
