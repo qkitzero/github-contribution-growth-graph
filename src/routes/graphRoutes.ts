@@ -14,6 +14,6 @@ const graphUseCase = new GraphUseCaseImpl(githubClient);
 
 const graphController = new GraphController(graphUseCase);
 
-router.get('/', graphController.getGraph);
+router.get('/contributions', graphController.getContributionsGraph);
 
 export default router;

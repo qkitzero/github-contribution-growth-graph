@@ -11,7 +11,7 @@ describe('GraphUseCase', () => {
     return { mockGitHubClient, graphUseCase };
   };
 
-  describe('createGraph', () => {
+  describe('createContributionsGraph', () => {
     beforeEach(() => {
       jest.useFakeTimers();
       jest.setSystemTime(new Date('2025-01-01T00:00:00.000Z'));
@@ -39,7 +39,7 @@ describe('GraphUseCase', () => {
         ),
       ]);
 
-      await graphUseCase.createGraph('test-user');
+      await graphUseCase.createContributionsGraph('test-user');
 
       expect(mockGitHubClient.getTotalContributions).toHaveBeenCalled();
       const firstCall = mockGitHubClient.getTotalContributions.mock.calls[0];
@@ -65,7 +65,7 @@ describe('GraphUseCase', () => {
         ),
       ]);
 
-      await graphUseCase.createGraph('test-user', '2023-01-01', '2025-01-01');
+      await graphUseCase.createContributionsGraph('test-user', '2023-01-01', '2025-01-01');
 
       expect(mockGitHubClient.getTotalContributions).toHaveBeenCalled();
       // Should generate monthly ranges between 2023-01-01 and 2025-01-01

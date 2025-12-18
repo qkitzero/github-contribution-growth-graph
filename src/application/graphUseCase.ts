@@ -3,7 +3,7 @@ import { Graph } from '../domain/graph/graph';
 import { Client as GitHubClient } from '../infrastructure/api/github/client';
 
 export interface GraphUseCase {
-  createGraph(
+  createContributionsGraph(
     user: string,
     from?: string,
     to?: string,
@@ -20,7 +20,7 @@ type DateRange = {
 export class GraphUseCaseImpl implements GraphUseCase {
   constructor(private readonly githubClient: GitHubClient) {}
 
-  async createGraph(
+  async createContributionsGraph(
     user: string,
     from?: string,
     to?: string,
