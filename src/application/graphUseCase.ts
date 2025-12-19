@@ -9,6 +9,7 @@ export interface GraphUseCase {
     to?: string,
     theme?: string,
     size?: string,
+    types?: string,
   ): Promise<Buffer>;
 }
 
@@ -26,10 +27,13 @@ export class GraphUseCaseImpl implements GraphUseCase {
     to?: string,
     theme?: string,
     size?: string,
+    types?: string,
   ): Promise<Buffer> {
     const { fromDate, toDate } = this.calculateDateRange(from, to);
     const monthlyRanges = this.generateMonthlyRanges(fromDate, toDate);
-    const contributions = await this.fetchAllContributions(user, monthlyRanges);
+    const allContributions = await this.fetchAllContributions(user, monthlyRanges);
+
+    const contributions = this.filterContributionsByTypes(allContributions, types);
 
     const graph = new Graph(theme, size);
     return graph.generate(contributions);
@@ -75,5 +79,17 @@ export class GraphUseCaseImpl implements GraphUseCase {
 
     const results = await Promise.all(promises);
     return results.flat();
+  }
+
+  private filterContributionsByTypes(
+    contributions: Contribution[],
+    types?: string,
+  ): Contribution[] {
+    if (!types) {
+      return contributions;
+    }
+
+    const allowedTypes = types.split(',').map((type) => type.trim());
+    return contributions.filter((contribution) => allowedTypes.includes(contribution.type));
   }
 }

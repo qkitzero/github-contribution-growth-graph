@@ -68,9 +68,6 @@ describe('GraphUseCase', () => {
       await graphUseCase.createContributionsGraph('test-user', '2023-01-01', '2025-01-01');
 
       expect(mockGitHubClient.getTotalContributions).toHaveBeenCalled();
-      // Should generate monthly ranges between 2023-01-01 and 2025-01-01
-      expect(mockGitHubClient.getTotalContributions.mock.calls.length).toBeGreaterThan(0);
-
       const firstCall = mockGitHubClient.getTotalContributions.mock.calls[0];
       expect(firstCall[0]).toBe('test-user');
       expect(firstCall[1]).toBe('2023-01-01T00:00:00.000Z');
