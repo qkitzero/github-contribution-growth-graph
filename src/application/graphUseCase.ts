@@ -89,7 +89,7 @@ export class GraphUseCaseImpl implements GraphUseCase {
       return contributions;
     }
 
-    const allowedTypes = types.split(',').map((type) => type.trim());
+    const allowedTypes = types.split(',').map((type) => type.trim().toLowerCase());
     return contributions.filter((contribution) => allowedTypes.includes(contribution.type));
   }
 }
