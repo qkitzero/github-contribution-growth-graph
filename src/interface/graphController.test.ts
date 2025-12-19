@@ -22,6 +22,7 @@ describe('GraphController', () => {
           to: '2025-12-31',
           theme: 'default',
           size: 'medium',
+          types: 'commit,issue,pr,review',
         },
       } as unknown as Request;
 
@@ -42,6 +43,7 @@ describe('GraphController', () => {
         '2025-12-31',
         'default',
         'medium',
+        'commit,issue,pr,review',
       );
       expect(res.setHeader).toHaveBeenCalledWith('Content-Type', 'image/png');
       expect(res.status).toHaveBeenCalledWith(200);
