@@ -1,6 +1,13 @@
 import { Period } from '../graph/period';
 
-export type ContributionType = 'commit' | 'issue' | 'pull_request' | 'pull_request_review';
+export const CONTRIBUTION_TYPES = {
+  COMMIT: 'commit',
+  ISSUE: 'issue',
+  PR: 'pr',
+  REVIEW: 'review',
+} as const;
+
+export type ContributionType = (typeof CONTRIBUTION_TYPES)[keyof typeof CONTRIBUTION_TYPES];
 
 export class Contribution {
   constructor(
@@ -15,12 +22,9 @@ export type PeriodData = Map<string, number>;
 export type AggregatedContributions = Map<ContributionType, PeriodData>;
 
 export class Contributions {
-  private static readonly TYPE_ORDER: readonly ContributionType[] = [
-    'commit',
-    'issue',
-    'pull_request',
-    'pull_request_review',
-  ] as const;
+  private static readonly TYPE_ORDER: readonly ContributionType[] = Object.values(
+    CONTRIBUTION_TYPES,
+  ) as ContributionType[];
 
   constructor(private readonly items: Contribution[]) {}
 

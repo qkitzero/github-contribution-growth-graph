@@ -18,13 +18,14 @@ While GitHub's contribution graph shows daily activity, it's hard to see your cu
 
 ### Query Parameters
 
-| Parameter | Type   | Required | Description                             | Default    |
-| --------- | ------ | -------- | --------------------------------------- | ---------- |
-| `user`    | string | **Yes**  | GitHub username                         | -          |
-| `from`    | string | No       | Start date (YYYY-MM-DD)                 | 1 year ago |
-| `to`      | string | No       | End date (YYYY-MM-DD)                   | Today      |
-| `theme`   | string | No       | Graph theme (see [Themes](#themes))     | `default`  |
-| `size`    | string | No       | Graph size (`small`, `medium`, `large`) | `medium`   |
+| Parameter | Type   | Required | Description                                                                                              | Default    |
+| --------- | ------ | -------- | -------------------------------------------------------------------------------------------------------- | ---------- |
+| `user`    | string | **Yes**  | GitHub username                                                                                          | -          |
+| `from`    | string | No       | Start date (YYYY-MM-DD)                                                                                  | 1 year ago |
+| `to`      | string | No       | End date (YYYY-MM-DD)                                                                                    | Today      |
+| `theme`   | string | No       | Graph theme (see [Themes](#themes))                                                                      | `default`  |
+| `size`    | string | No       | Graph size (`small`, `medium`, `large`)                                                                  | `medium`   |
+| `types`   | string | No       | Contribution types to display (comma-separated: `commit`, `issue`, `pr`, `review`). Example: `commit,pr` | All types  |
 
 ## Themes
 

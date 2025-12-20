@@ -1,5 +1,9 @@
 import { gql, GraphQLClient } from 'graphql-request';
-import { Contribution } from '../../../domain/contribution/contribution';
+import {
+  Contribution,
+  CONTRIBUTION_TYPES,
+  ContributionType,
+} from '../../../domain/contribution/contribution';
 
 const TOTAL_CONTRIBUTIONS_QUERY = gql`
   query ($userName: String!, $from: DateTime!, $to: DateTime!) {
@@ -47,25 +51,20 @@ export class ClientImpl implements Client {
       from,
       to,
     });
-    const {
-      totalCommitContributions,
-      totalIssueContributions,
-      totalPullRequestContributions,
-      totalPullRequestReviewContributions,
-    } = res.user.contributionsCollection;
+    const collection = res.user.contributionsCollection;
 
     const fromDate = new Date(from);
     const toDate = new Date(to);
-    return [
-      new Contribution(fromDate, toDate, totalCommitContributions, 'commit'),
-      new Contribution(fromDate, toDate, totalIssueContributions, 'issue'),
-      new Contribution(fromDate, toDate, totalPullRequestContributions, 'pull_request'),
-      new Contribution(
-        fromDate,
-        toDate,
-        totalPullRequestReviewContributions,
-        'pull_request_review',
-      ),
+
+    const contributionMapping: Array<{ count: number; type: ContributionType }> = [
+      { count: collection.totalCommitContributions, type: CONTRIBUTION_TYPES.COMMIT },
+      { count: collection.totalIssueContributions, type: CONTRIBUTION_TYPES.ISSUE },
+      { count: collection.totalPullRequestContributions, type: CONTRIBUTION_TYPES.PR },
+      { count: collection.totalPullRequestReviewContributions, type: CONTRIBUTION_TYPES.REVIEW },
     ];
+
+    return contributionMapping.map(
+      ({ count, type }) => new Contribution(fromDate, toDate, count, type),
+    );
   }
 }
