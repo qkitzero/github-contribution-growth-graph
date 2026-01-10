@@ -19,7 +19,7 @@ While GitHub's contribution graph shows daily activity, it's hard to see your cu
 [![GitHub Language Growth Graph](https://github-contribution-growth-graph.qkitzero.xyz/graph/languages?user=YOUR_USERNAME)](https://github.com/qkitzero/github-contribution-growth-graph)
 ```
 
-## Contribution Graph　Query Parameters
+## Contribution Graph Query Parameters
 
 | Parameter | Type   | Required | Description                                                                                              | Default    |
 | --------- | ------ | -------- | -------------------------------------------------------------------------------------------------------- | ---------- |
