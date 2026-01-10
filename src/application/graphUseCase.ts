@@ -12,13 +12,7 @@ export interface GraphUseCase {
     size?: string,
     types?: string,
   ): Promise<Buffer>;
-  createLanguagesGraph(
-    user: string,
-    from?: string,
-    to?: string,
-    theme?: string,
-    size?: string,
-  ): Promise<Buffer>;
+  createLanguagesGraph(user: string, from?: string, to?: string, size?: string): Promise<Buffer>;
 }
 
 type DateRange = {
@@ -52,14 +46,13 @@ export class GraphUseCaseImpl implements GraphUseCase {
     user: string,
     from?: string,
     to?: string,
-    theme?: string,
     size?: string,
   ): Promise<Buffer> {
     const { fromDate, toDate } = this.calculateDateRange(from, to);
     const monthlyRanges = this.generateMonthlyRanges(fromDate, toDate);
     const allLanguages = await this.fetchAllLanguages(user, monthlyRanges);
 
-    const graph = new Graph(theme, size);
+    const graph = new Graph(undefined, size);
 
     return graph.generateFromLanguages(allLanguages);
   }

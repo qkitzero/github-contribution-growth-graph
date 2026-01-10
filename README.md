@@ -4,30 +4,33 @@
 [![Test](https://github.com/qkitzero/github-contribution-growth-graph/actions/workflows/test.yml/badge.svg)](https://github.com/qkitzero/github-contribution-growth-graph/actions/workflows/test.yml)
 [![codecov](https://codecov.io/gh/qkitzero/github-contribution-growth-graph/graph/badge.svg)](https://codecov.io/gh/qkitzero/github-contribution-growth-graph)
 
-Visualize your GitHub contribution journey over multiple years at a glance.
+Visualize your GitHub contribution journey and language usage over multiple years at a glance.
 
-While GitHub's contribution graph shows daily activity, it's hard to see your cumulative growth over time. This service generates a dynamic growth graph that clearly displays your accumulated contributions across years, perfect for showcasing your consistent effort on your profile.
+While GitHub's contribution graph shows daily activity, it's hard to see your cumulative growth over time. This service generates a dynamic growth graph that clearly displays your accumulated contributions and language statistics across years, perfect for showcasing your consistent effort on your profile.
 
 [![GitHub Contribution Growth Graph](https://github-contribution-growth-graph.qkitzero.xyz/graph/contributions?user=qkitzero)](https://github.com/qkitzero/github-contribution-growth-graph)
+[![GitHub Language Growth Graph](https://github-contribution-growth-graph.qkitzero.xyz/graph/languages?user=qkitzero)](https://github.com/qkitzero/github-contribution-growth-graph)
 
 ## Usage
 
 ```markdown
 [![GitHub Contribution Growth Graph](https://github-contribution-growth-graph.qkitzero.xyz/graph/contributions?user=YOUR_USERNAME)](https://github.com/qkitzero/github-contribution-growth-graph)
+
+[![GitHub Language Growth Graph](https://github-contribution-growth-graph.qkitzero.xyz/graph/languages?user=YOUR_USERNAME)](https://github.com/qkitzero/github-contribution-growth-graph)
 ```
 
-### Query Parameters
+## Contribution Graph Query Parameters
 
 | Parameter | Type   | Required | Description                                                                                              | Default    |
 | --------- | ------ | -------- | -------------------------------------------------------------------------------------------------------- | ---------- |
 | `user`    | string | **Yes**  | GitHub username                                                                                          | -          |
 | `from`    | string | No       | Start date (YYYY-MM-DD)                                                                                  | 1 year ago |
 | `to`      | string | No       | End date (YYYY-MM-DD)                                                                                    | Today      |
-| `theme`   | string | No       | Graph theme (see [Themes](#themes))                                                                      | `default`  |
+| `theme`   | string | No       | Graph theme (see [Contribution Graph Themes](#contribution-graph-themes))                                | `default`  |
 | `size`    | string | No       | Graph size (`small`, `medium`, `large`)                                                                  | `medium`   |
 | `types`   | string | No       | Contribution types to display (comma-separated: `commit`, `issue`, `pr`, `review`). Example: `commit,pr` | All types  |
 
-## Themes
+## Contribution Graph Themes
 
 Choose from various color themes to match your profile style:
 
@@ -42,3 +45,12 @@ Choose from various color themes to match your profile style:
 | `pink`    | ![pink](https://github-contribution-growth-graph.qkitzero.xyz/graph/contributions?user=qkitzero&theme=pink&size=small)       |
 | `dark`    | ![dark](https://github-contribution-growth-graph.qkitzero.xyz/graph/contributions?user=qkitzero&theme=dark&size=small)       |
 | `light`   | ![light](https://github-contribution-growth-graph.qkitzero.xyz/graph/contributions?user=qkitzero&theme=light&size=small)     |
+
+## Language Graph Query Parameters
+
+| Parameter | Type   | Required | Description                             | Default    |
+| --------- | ------ | -------- | --------------------------------------- | ---------- |
+| `user`    | string | **Yes**  | GitHub username                         | -          |
+| `from`    | string | No       | Start date (YYYY-MM-DD)                 | 1 year ago |
+| `to`      | string | No       | End date (YYYY-MM-DD)                   | Today      |
+| `size`    | string | No       | Graph size (`small`, `medium`, `large`) | `medium`   |
