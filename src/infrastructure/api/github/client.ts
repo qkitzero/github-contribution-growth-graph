@@ -185,10 +185,12 @@ export class ClientImpl implements Client {
       });
     };
 
-    processRepos(collection.commitContributionsByRepository);
-    processRepos(collection.pullRequestContributionsByRepository);
-    processRepos(collection.issueContributionsByRepository);
-    processRepos(collection.pullRequestReviewContributionsByRepository);
+    [
+      collection.commitContributionsByRepository,
+      collection.pullRequestContributionsByRepository,
+      collection.issueContributionsByRepository,
+      collection.pullRequestReviewContributionsByRepository,
+    ].forEach(processRepos);
 
     const languageMap = new Map<string, { color: string; size: number }>();
 
