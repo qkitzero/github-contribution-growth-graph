@@ -97,22 +97,30 @@ export class GraphUseCaseImpl implements GraphUseCase {
     return ranges;
   }
 
-  private async fetchAllContributions(user: string, ranges: DateRange[]): Promise<Contribution[]> {
-    const promises = ranges.map((range) =>
-      this.githubClient.getTotalContributions(user, range.from, range.to),
-    );
-
+  private async fetchAll<T>(
+    fetcher: (user: string, from: string, to: string) => Promise<T[]>,
+    user: string,
+    ranges: DateRange[],
+  ): Promise<T[]> {
+    const promises = ranges.map((range) => fetcher(user, range.from, range.to));
     const results = await Promise.all(promises);
     return results.flat();
   }
 
-  private async fetchAllLanguages(user: string, ranges: DateRange[]): Promise<Language[]> {
-    const promises = ranges.map((range) =>
-      this.githubClient.getLanguageContributions(user, range.from, range.to),
+  private async fetchAllContributions(user: string, ranges: DateRange[]): Promise<Contribution[]> {
+    return this.fetchAll(
+      this.githubClient.getTotalContributions.bind(this.githubClient),
+      user,
+      ranges,
     );
+  }
 
-    const results = await Promise.all(promises);
-    return results.flat();
+  private async fetchAllLanguages(user: string, ranges: DateRange[]): Promise<Language[]> {
+    return this.fetchAll(
+      this.githubClient.getLanguageContributions.bind(this.githubClient),
+      user,
+      ranges,
+    );
   }
 
   private filterContributionsByTypes(
