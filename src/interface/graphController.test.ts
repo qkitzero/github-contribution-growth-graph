@@ -6,6 +6,7 @@ describe('GraphController', () => {
   const setup = () => {
     const mockGraphUseCase: jest.Mocked<GraphUseCase> = {
       createContributionsGraph: jest.fn(),
+      createLanguagesGraph: jest.fn(),
     };
     const graphController = new GraphController(mockGraphUseCase);
     return { mockGraphUseCase, graphController };

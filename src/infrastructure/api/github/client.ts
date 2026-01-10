@@ -4,6 +4,7 @@ import {
   CONTRIBUTION_TYPES,
   ContributionType,
 } from '../../../domain/contribution/contribution';
+import { Language } from '../../../domain/language/language';
 
 const TOTAL_CONTRIBUTIONS_QUERY = gql`
   query ($userName: String!, $from: DateTime!, $to: DateTime!) {
@@ -29,8 +30,106 @@ type TotalContributionsResponse = {
   };
 };
 
+const LANGUAGE_CONTRIBUTIONS_QUERY = gql`
+  query ($userName: String!, $from: DateTime!, $to: DateTime!) {
+    user(login: $userName) {
+      contributionsCollection(from: $from, to: $to) {
+        commitContributionsByRepository(maxRepositories: 100) {
+          repository {
+            nameWithOwner
+            languages(first: 10, orderBy: { field: SIZE, direction: DESC }) {
+              edges {
+                size
+                node {
+                  name
+                  color
+                }
+              }
+            }
+          }
+        }
+        pullRequestContributionsByRepository(maxRepositories: 100) {
+          repository {
+            nameWithOwner
+            languages(first: 10, orderBy: { field: SIZE, direction: DESC }) {
+              edges {
+                size
+                node {
+                  name
+                  color
+                }
+              }
+            }
+          }
+        }
+        issueContributionsByRepository(maxRepositories: 100) {
+          repository {
+            nameWithOwner
+            languages(first: 10, orderBy: { field: SIZE, direction: DESC }) {
+              edges {
+                size
+                node {
+                  name
+                  color
+                }
+              }
+            }
+          }
+        }
+        pullRequestReviewContributionsByRepository(maxRepositories: 100) {
+          repository {
+            nameWithOwner
+            languages(first: 10, orderBy: { field: SIZE, direction: DESC }) {
+              edges {
+                size
+                node {
+                  name
+                  color
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+`;
+
+type LanguageNode = {
+  name: string;
+  color: string;
+};
+
+type LanguageEdge = {
+  size: number;
+  node: LanguageNode;
+};
+
+type Repository = {
+  nameWithOwner: string;
+  languages: {
+    edges: LanguageEdge[];
+  };
+};
+
+type ContributionsByRepository = {
+  repository: Repository;
+}[];
+
+type LanguageContributionsResponse = {
+  user: {
+    contributionsCollection: {
+      commitContributionsByRepository: ContributionsByRepository;
+      pullRequestContributionsByRepository: ContributionsByRepository;
+      issueContributionsByRepository: ContributionsByRepository;
+      pullRequestReviewContributionsByRepository: ContributionsByRepository;
+    };
+  };
+};
+
 export interface Client {
   getTotalContributions(userName: string, from: string, to: string): Promise<Contribution[]>;
+  getLanguageContributions(userName: string, from: string, to: string): Promise<Language[]>;
 }
 
 export class ClientImpl implements Client {
@@ -53,9 +152,6 @@ export class ClientImpl implements Client {
     });
     const collection = res.user.contributionsCollection;
 
-    const fromDate = new Date(from);
-    const toDate = new Date(to);
-
     const contributionMapping: Array<{ count: number; type: ContributionType }> = [
       { count: collection.totalCommitContributions, type: CONTRIBUTION_TYPES.COMMIT },
       { count: collection.totalIssueContributions, type: CONTRIBUTION_TYPES.ISSUE },
@@ -64,7 +160,61 @@ export class ClientImpl implements Client {
     ];
 
     return contributionMapping.map(
-      ({ count, type }) => new Contribution(fromDate, toDate, count, type),
+      ({ count, type }) => new Contribution(new Date(from), new Date(to), count, type),
     );
+  }
+
+  async getLanguageContributions(userName: string, from: string, to: string): Promise<Language[]> {
+    const res = await this.client.request<LanguageContributionsResponse>(
+      LANGUAGE_CONTRIBUTIONS_QUERY,
+      {
+        userName,
+        from,
+        to,
+      },
+    );
+    const collection = res.user.contributionsCollection;
+
+    const repositoryLanguages = new Map<string, LanguageEdge[]>();
+
+    const processRepos = (contributionsByRepo: ContributionsByRepository) => {
+      contributionsByRepo.forEach(({ repository }) => {
+        if (!repositoryLanguages.has(repository.nameWithOwner)) {
+          repositoryLanguages.set(repository.nameWithOwner, repository.languages.edges);
+        }
+      });
+    };
+
+    [
+      collection.commitContributionsByRepository,
+      collection.pullRequestContributionsByRepository,
+      collection.issueContributionsByRepository,
+      collection.pullRequestReviewContributionsByRepository,
+    ].forEach(processRepos);
+
+    const languageMap = new Map<string, { color: string; size: number }>();
+
+    repositoryLanguages.forEach((edges) => {
+      edges.forEach((edge) => {
+        const { name, color } = edge.node;
+        const { size } = edge;
+
+        if (languageMap.has(name)) {
+          const current = languageMap.get(name)!;
+          languageMap.set(name, {
+            color: current.color,
+            size: current.size + size,
+          });
+        } else {
+          languageMap.set(name, { color, size });
+        }
+      });
+    });
+
+    const languages: Language[] = Array.from(languageMap.entries()).map(
+      ([name, { color, size }]) => new Language(new Date(from), new Date(to), name, color, size),
+    );
+
+    return languages;
   }
 }

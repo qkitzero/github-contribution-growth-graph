@@ -1,5 +1,6 @@
 import { Contribution } from '../domain/contribution/contribution';
 import { Graph } from '../domain/graph/graph';
+import { Language } from '../domain/language/language';
 import { Client as GitHubClient } from '../infrastructure/api/github/client';
 
 export interface GraphUseCase {
@@ -11,6 +12,7 @@ export interface GraphUseCase {
     size?: string,
     types?: string,
   ): Promise<Buffer>;
+  createLanguagesGraph(user: string, from?: string, to?: string, size?: string): Promise<Buffer>;
 }
 
 type DateRange = {
@@ -36,7 +38,23 @@ export class GraphUseCaseImpl implements GraphUseCase {
     const contributions = this.filterContributionsByTypes(allContributions, types);
 
     const graph = new Graph(theme, size);
+
     return graph.generate(contributions);
+  }
+
+  async createLanguagesGraph(
+    user: string,
+    from?: string,
+    to?: string,
+    size?: string,
+  ): Promise<Buffer> {
+    const { fromDate, toDate } = this.calculateDateRange(from, to);
+    const monthlyRanges = this.generateMonthlyRanges(fromDate, toDate);
+    const allLanguages = await this.fetchAllLanguages(user, monthlyRanges);
+
+    const graph = new Graph(undefined, size);
+
+    return graph.generateFromLanguages(allLanguages);
   }
 
   private calculateDateRange(from?: string, to?: string): { fromDate: Date; toDate: Date } {
@@ -72,13 +90,30 @@ export class GraphUseCaseImpl implements GraphUseCase {
     return ranges;
   }
 
-  private async fetchAllContributions(user: string, ranges: DateRange[]): Promise<Contribution[]> {
-    const promises = ranges.map((range) =>
-      this.githubClient.getTotalContributions(user, range.from, range.to),
-    );
-
+  private async fetchAll<T>(
+    fetcher: (user: string, from: string, to: string) => Promise<T[]>,
+    user: string,
+    ranges: DateRange[],
+  ): Promise<T[]> {
+    const promises = ranges.map((range) => fetcher(user, range.from, range.to));
     const results = await Promise.all(promises);
     return results.flat();
+  }
+
+  private async fetchAllContributions(user: string, ranges: DateRange[]): Promise<Contribution[]> {
+    return this.fetchAll(
+      this.githubClient.getTotalContributions.bind(this.githubClient),
+      user,
+      ranges,
+    );
+  }
+
+  private async fetchAllLanguages(user: string, ranges: DateRange[]): Promise<Language[]> {
+    return this.fetchAll(
+      this.githubClient.getLanguageContributions.bind(this.githubClient),
+      user,
+      ranges,
+    );
   }
 
   private filterContributionsByTypes(

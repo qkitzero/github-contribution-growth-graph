@@ -12,5 +12,6 @@ const graphUseCase = new GraphUseCaseImpl(githubClient);
 const graphController = new GraphController(graphUseCase);
 
 router.get('/contributions', graphController.getContributionsGraph);
+router.get('/languages', graphController.getLanguagesGraph);
 
 export default router;
