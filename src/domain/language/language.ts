@@ -60,11 +60,11 @@ export class Languages {
 
   getOrderedLanguages(aggregated: AggregatedLanguages): string[] {
     return [...aggregated.entries()]
-      .sort(([, a], [, b]) => {
-        const totalA = [...a.data.values()].reduce((sum, v) => sum + v, 0);
-        const totalB = [...b.data.values()].reduce((sum, v) => sum + v, 0);
-        return totalB - totalA;
-      })
-      .map(([name]) => name);
+      .map(([name, langData]) => ({
+        name,
+        totalSize: [...langData.data.values()].reduce((sum, v) => sum + v, 0),
+      }))
+      .sort((a, b) => b.totalSize - a.totalSize)
+      .map((item) => item.name);
   }
 }
