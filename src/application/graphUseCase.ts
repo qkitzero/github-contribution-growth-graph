@@ -52,7 +52,7 @@ export class GraphUseCaseImpl implements GraphUseCase {
     const monthlyRanges = this.generateMonthlyRanges(fromDate, toDate);
     const allLanguages = await this.fetchAllLanguages(user, monthlyRanges);
 
-    const graph = new Graph(size);
+    const graph = new Graph(undefined, size);
 
     return graph.generateFromLanguages(allLanguages);
   }
