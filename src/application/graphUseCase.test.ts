@@ -6,6 +6,7 @@ describe('GraphUseCase', () => {
   const setup = () => {
     const mockGitHubClient: jest.Mocked<GitHubClient> = {
       getTotalContributions: jest.fn(),
+      getLanguageContributions: jest.fn(),
     };
     const graphUseCase = new GraphUseCaseImpl(mockGitHubClient);
     return { mockGitHubClient, graphUseCase };

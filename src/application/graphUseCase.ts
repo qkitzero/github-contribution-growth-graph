@@ -1,5 +1,6 @@
 import { Contribution } from '../domain/contribution/contribution';
 import { Graph } from '../domain/graph/graph';
+import { Language } from '../domain/language/language';
 import { Client as GitHubClient } from '../infrastructure/api/github/client';
 
 export interface GraphUseCase {
@@ -10,6 +11,13 @@ export interface GraphUseCase {
     theme?: string,
     size?: string,
     types?: string,
+  ): Promise<Buffer>;
+  createLanguagesGraph(
+    user: string,
+    from?: string,
+    to?: string,
+    theme?: string,
+    size?: string,
   ): Promise<Buffer>;
 }
 
@@ -36,7 +44,24 @@ export class GraphUseCaseImpl implements GraphUseCase {
     const contributions = this.filterContributionsByTypes(allContributions, types);
 
     const graph = new Graph(theme, size);
+
     return graph.generate(contributions);
+  }
+
+  async createLanguagesGraph(
+    user: string,
+    from?: string,
+    to?: string,
+    theme?: string,
+    size?: string,
+  ): Promise<Buffer> {
+    const { fromDate, toDate } = this.calculateDateRange(from, to);
+    const monthlyRanges = this.generateMonthlyRanges(fromDate, toDate);
+    const allLanguages = await this.fetchAllLanguages(user, monthlyRanges);
+
+    const graph = new Graph(theme, size);
+
+    return graph.generateFromLanguages(allLanguages);
   }
 
   private calculateDateRange(from?: string, to?: string): { fromDate: Date; toDate: Date } {
@@ -75,6 +100,15 @@ export class GraphUseCaseImpl implements GraphUseCase {
   private async fetchAllContributions(user: string, ranges: DateRange[]): Promise<Contribution[]> {
     const promises = ranges.map((range) =>
       this.githubClient.getTotalContributions(user, range.from, range.to),
+    );
+
+    const results = await Promise.all(promises);
+    return results.flat();
+  }
+
+  private async fetchAllLanguages(user: string, ranges: DateRange[]): Promise<Language[]> {
+    const promises = ranges.map((range) =>
+      this.githubClient.getLanguageContributions(user, range.from, range.to),
     );
 
     const results = await Promise.all(promises);

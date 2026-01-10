@@ -1,10 +1,12 @@
-import { ChartConfiguration } from 'chart.js';
+import { ChartConfiguration, ChartDataset } from 'chart.js';
 import { ChartJSNodeCanvas } from 'chartjs-node-canvas';
 import {
   AggregatedContributions,
   Contribution,
   Contributions,
+  ContributionType,
 } from '../contribution/contribution';
+import { Language, Languages } from '../language/language';
 import { Size } from './size';
 import { Theme } from './theme';
 
@@ -43,7 +45,50 @@ export class Graph {
     const aggregated = contributionsCollection.aggregate();
     const periods = contributionsCollection.getAllPeriods(aggregated);
     const datasets = this.createDatasets(contributionsCollection, aggregated, periods);
-    const chartConfiguration = this.createChartConfiguration(periods, datasets);
+    const chartConfiguration = this.createChartConfiguration(
+      periods,
+      datasets,
+      'GitHub Contribution Growth Graph',
+      'Cumulative Contributions',
+    );
+
+    return await this.chartJSNodeCanvas.renderToBuffer(chartConfiguration);
+  }
+
+  async generateFromLanguages(languages: Language[]): Promise<Buffer> {
+    const languagesCollection = new Languages(languages);
+
+    if (languagesCollection.isEmpty) {
+      return this.generateEmptyChart();
+    }
+
+    const aggregated = languagesCollection.aggregate();
+    const periods = languagesCollection.getAllPeriods(aggregated);
+    const orderedLangs = languagesCollection.getOrderedLanguages(aggregated);
+
+    const datasets: ChartDataset<'line'>[] = orderedLangs.map((langName) => {
+      const { color, data: periodData } = aggregated.get(langName)!;
+
+      const cumulativeData = languagesCollection.calculateCumulative(periodData, periods);
+
+      return {
+        label: langName,
+        data: cumulativeData,
+        borderColor: color,
+        backgroundColor: `${color}${Graph.CHART_DEFAULTS.BACKGROUND_ALPHA}`,
+        fill: true,
+        tension: Graph.CHART_DEFAULTS.TENSION,
+        pointRadius: Graph.CHART_DEFAULTS.POINT_RADIUS,
+        stack: 'languages',
+      };
+    });
+
+    const chartConfiguration = this.createChartConfiguration(
+      periods,
+      datasets,
+      'GitHub Language Growth Graph',
+      'Cumulative Code Size (bytes)',
+    );
 
     return await this.chartJSNodeCanvas.renderToBuffer(chartConfiguration);
   }
@@ -64,10 +109,10 @@ export class Graph {
     contributions: Contributions,
     aggregated: AggregatedContributions,
     periods: string[],
-  ) {
+  ): ChartDataset<'line'>[] {
     const orderedTypes = contributions.getOrderedTypes(aggregated);
 
-    return orderedTypes.map((type) => {
+    return orderedTypes.map((type: ContributionType) => {
       const periodData = aggregated.get(type)!;
       const color = this.theme.getColorForType(type);
       const cumulativeData = contributions.calculateCumulative(periodData, periods);
@@ -87,7 +132,9 @@ export class Graph {
 
   private createChartConfiguration(
     labels: string[],
-    datasets: ReturnType<typeof this.createDatasets>,
+    datasets: ChartDataset<'line'>[],
+    graphTitle: string,
+    yAxisTitle: string,
   ): ChartConfiguration {
     return {
       type: 'line',
@@ -101,13 +148,13 @@ export class Graph {
             title: { display: false, text: 'Period' },
           },
           y: {
-            title: { display: false, text: 'Cumulative Contributions' },
+            title: { display: true, text: yAxisTitle },
             beginAtZero: true,
           },
         },
         plugins: {
           legend: { display: true, position: 'top' },
-          title: { display: true, text: 'GitHub Contribution Growth Graph' },
+          title: { display: true, text: graphTitle },
         },
       },
     };
