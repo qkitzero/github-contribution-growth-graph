@@ -15,15 +15,4 @@ export class Period {
   toString(): string {
     return `${this.year}/${String(this.month).padStart(2, '0')}`;
   }
-
-  equals(other: Period): boolean {
-    return this.year === other.year && this.month === other.month;
-  }
-
-  compareTo(other: Period): number {
-    if (this.year !== other.year) {
-      return this.year - other.year;
-    }
-    return this.month - other.month;
-  }
 }
