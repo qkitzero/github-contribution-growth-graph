@@ -51,4 +51,40 @@ describe('GraphController', () => {
       expect(res.send).toHaveBeenCalledWith(mockGraphBuffer);
     });
   });
+
+  describe('getLanguagesGraph', () => {
+    it('should create a graph and return 200 with image/png content type', async () => {
+      const { mockGraphUseCase, graphController } = setup();
+
+      const req = {
+        query: {
+          user: 'testuser',
+          from: '2025-01-01',
+          to: '2025-12-31',
+          size: 'medium',
+        },
+      } as unknown as Request;
+
+      const res = {
+        setHeader: jest.fn().mockReturnThis(),
+        status: jest.fn().mockReturnThis(),
+        send: jest.fn(),
+      } as unknown as Response;
+
+      const mockGraphBuffer = Buffer.from('mock graph data');
+      mockGraphUseCase.createLanguagesGraph.mockResolvedValue(mockGraphBuffer);
+
+      await graphController.getLanguagesGraph(req, res);
+
+      expect(mockGraphUseCase.createLanguagesGraph).toHaveBeenCalledWith(
+        'testuser',
+        '2025-01-01',
+        '2025-12-31',
+        'medium',
+      );
+      expect(res.setHeader).toHaveBeenCalledWith('Content-Type', 'image/png');
+      expect(res.status).toHaveBeenCalledWith(200);
+      expect(res.send).toHaveBeenCalledWith(mockGraphBuffer);
+    });
+  });
 });
