@@ -2,26 +2,20 @@ import { NextFunction, Request, Response } from 'express';
 import { ErrorMiddleware } from './error';
 
 describe('ErrorMiddleware', () => {
-  let mockRequest: Partial<Request>;
-  let mockResponse: Partial<Response>;
-  let mockNext: NextFunction;
-  let consoleErrorSpy: jest.SpyInstance;
-
-  beforeEach(() => {
-    mockRequest = {};
-    mockResponse = {
+  const setup = () => {
+    const mockRequest: Partial<Request> = {};
+    const mockResponse: Partial<Response> = {
       status: jest.fn().mockReturnThis(),
       json: jest.fn(),
     };
-    mockNext = jest.fn();
-    consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
-  });
-
-  afterEach(() => {
-    consoleErrorSpy.mockRestore();
-  });
+    const mockNext: NextFunction = jest.fn();
+    const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+    return { mockRequest, mockResponse, mockNext, consoleErrorSpy };
+  };
 
   it('should handle an error, log it, set status to 500, and send a JSON response', () => {
+    const { mockRequest, mockResponse, mockNext, consoleErrorSpy } = setup();
+
     const error = new Error('Test error message');
     error.stack = 'Test error stack trace';
 
@@ -34,9 +28,13 @@ describe('ErrorMiddleware', () => {
       message: error.message,
     });
     expect(mockNext).not.toHaveBeenCalled();
+
+    consoleErrorSpy.mockRestore();
   });
 
   it('should handle an error without a stack, logging only the error message', () => {
+    const { mockRequest, mockResponse, mockNext, consoleErrorSpy } = setup();
+
     const error = new Error('Another test error');
     delete error.stack;
 
@@ -49,5 +47,7 @@ describe('ErrorMiddleware', () => {
       message: error.message,
     });
     expect(mockNext).not.toHaveBeenCalled();
+
+    consoleErrorSpy.mockRestore();
   });
 });
