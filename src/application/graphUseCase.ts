@@ -39,7 +39,7 @@ export class GraphUseCaseImpl implements GraphUseCase {
 
     const graph = new Graph(theme, size);
 
-    return graph.generate(contributions);
+    return graph.generateFromContributions(contributions);
   }
 
   async createLanguagesGraph(

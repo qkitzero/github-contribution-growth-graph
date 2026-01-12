@@ -1,4 +1,4 @@
-import { Contribution } from '../domain/contribution/contribution';
+import { Contribution, CONTRIBUTION_TYPES } from '../domain/contribution/contribution';
 import { Language } from '../domain/language/language';
 import { Client as GitHubClient } from '../infrastructure/api/github/client';
 import { GraphUseCaseImpl } from './graphUseCase';
@@ -30,14 +30,14 @@ describe('GraphUseCase', () => {
         new Contribution(
           new Date('2024-01-01T00:00:00.000Z'),
           new Date('2024-02-01T00:00:00.000Z'),
-          5,
-          'commit',
+          10,
+          CONTRIBUTION_TYPES.COMMIT,
         ),
         new Contribution(
           new Date('2024-01-01T00:00:00.000Z'),
           new Date('2024-02-01T00:00:00.000Z'),
           10,
-          'issue',
+          CONTRIBUTION_TYPES.ISSUE,
         ),
       ]);
 
@@ -57,14 +57,14 @@ describe('GraphUseCase', () => {
         new Contribution(
           new Date('2023-01-01T00:00:00.000Z'),
           new Date('2023-02-01T00:00:00.000Z'),
-          5,
-          'commit',
+          10,
+          CONTRIBUTION_TYPES.COMMIT,
         ),
         new Contribution(
           new Date('2023-01-01T00:00:00.000Z'),
           new Date('2023-02-01T00:00:00.000Z'),
           10,
-          'issue',
+          CONTRIBUTION_TYPES.ISSUE,
         ),
       ]);
 
@@ -75,6 +75,52 @@ describe('GraphUseCase', () => {
       expect(firstCall[0]).toBe('test-user');
       expect(firstCall[1]).toBe('2023-01-01T00:00:00.000Z');
       expect(firstCall[2]).toBe('2023-02-01T00:00:00.000Z');
+    });
+
+    test('should create a graph with specified types', async () => {
+      const { mockGitHubClient, graphUseCase } = setup();
+
+      mockGitHubClient.getTotalContributions.mockResolvedValue([
+        new Contribution(
+          new Date('2024-01-01T00:00:00.000Z'),
+          new Date('2024-02-01T00:00:00.000Z'),
+          10,
+          CONTRIBUTION_TYPES.COMMIT,
+        ),
+        new Contribution(
+          new Date('2024-01-01T00:00:00.000Z'),
+          new Date('2024-02-01T00:00:00.000Z'),
+          10,
+          CONTRIBUTION_TYPES.ISSUE,
+        ),
+        new Contribution(
+          new Date('2024-01-01T00:00:00.000Z'),
+          new Date('2024-02-01T00:00:00.000Z'),
+          10,
+          CONTRIBUTION_TYPES.PR,
+        ),
+        new Contribution(
+          new Date('2024-01-01T00:00:00.000Z'),
+          new Date('2024-02-01T00:00:00.000Z'),
+          10,
+          CONTRIBUTION_TYPES.REVIEW,
+        ),
+      ]);
+
+      await graphUseCase.createContributionsGraph(
+        'test-user',
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        'commit,issue',
+      );
+
+      expect(mockGitHubClient.getTotalContributions).toHaveBeenCalled();
+      const firstCall = mockGitHubClient.getTotalContributions.mock.calls[0];
+      expect(firstCall[0]).toBe('test-user');
+      expect(firstCall[1]).toBe('2024-01-01T00:00:00.000Z');
+      expect(firstCall[2]).toBe('2024-02-01T00:00:00.000Z');
     });
   });
 
