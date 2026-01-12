@@ -109,6 +109,6 @@ export class Theme {
   }
 
   getColorForType(type: ContributionType): string {
-    return this.typeColors[type] ?? '#999999';
+    return this.typeColors[type];
   }
 }
