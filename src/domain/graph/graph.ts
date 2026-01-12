@@ -6,7 +6,7 @@ import {
   Contributions,
   ContributionType,
 } from '../contribution/contribution';
-import { Language, Languages } from '../language/language';
+import { AggregatedLanguages, Language, Languages } from '../language/language';
 import { Size } from './size';
 import { Theme } from './theme';
 
@@ -35,7 +35,7 @@ export class Graph {
     });
   }
 
-  async generate(contributions: Contribution[]): Promise<Buffer> {
+  async generateFromContributions(contributions: Contribution[]): Promise<Buffer> {
     const contributionsCollection = new Contributions(contributions);
 
     if (contributionsCollection.isEmpty) {
@@ -44,7 +44,8 @@ export class Graph {
 
     const aggregated = contributionsCollection.aggregate();
     const periods = contributionsCollection.getAllPeriods(aggregated);
-    const datasets = this.createDatasets(contributionsCollection, aggregated, periods);
+    const datasets = this.createContributionDatasets(contributionsCollection, aggregated, periods);
+
     const chartConfiguration = this.createChartConfiguration(
       periods,
       datasets,
@@ -64,24 +65,7 @@ export class Graph {
 
     const aggregated = languagesCollection.aggregate();
     const periods = languagesCollection.getAllPeriods(aggregated);
-    const orderedLangs = languagesCollection.getOrderedLanguages(aggregated);
-
-    const datasets: ChartDataset<'line'>[] = orderedLangs.map((langName) => {
-      const { color, data: periodData } = aggregated.get(langName)!;
-
-      const cumulativeData = languagesCollection.calculateCumulative(periodData, periods);
-
-      return {
-        label: langName,
-        data: cumulativeData,
-        borderColor: color,
-        backgroundColor: `${color}${Graph.CHART_DEFAULTS.BACKGROUND_ALPHA}`,
-        fill: true,
-        tension: Graph.CHART_DEFAULTS.TENSION,
-        pointRadius: Graph.CHART_DEFAULTS.POINT_RADIUS,
-        stack: 'languages',
-      };
-    });
+    const datasets = this.createLanguageDatasets(languagesCollection, aggregated, periods);
 
     const chartConfiguration = this.createChartConfiguration(
       periods,
@@ -105,7 +89,7 @@ export class Graph {
     });
   }
 
-  private createDatasets(
+  private createContributionDatasets(
     contributions: Contributions,
     aggregated: AggregatedContributions,
     periods: string[],
@@ -126,6 +110,30 @@ export class Graph {
         tension: Graph.CHART_DEFAULTS.TENSION,
         pointRadius: Graph.CHART_DEFAULTS.POINT_RADIUS,
         stack: 'contributions',
+      };
+    });
+  }
+
+  private createLanguageDatasets(
+    languages: Languages,
+    aggregated: AggregatedLanguages,
+    periods: string[],
+  ): ChartDataset<'line'>[] {
+    const orderedLangs = languages.getOrderedLanguages(aggregated);
+
+    return orderedLangs.map((langName) => {
+      const { color, data: periodData } = aggregated.get(langName)!;
+      const cumulativeData = languages.calculateCumulative(periodData, periods);
+
+      return {
+        label: langName,
+        data: cumulativeData,
+        borderColor: color,
+        backgroundColor: `${color}${Graph.CHART_DEFAULTS.BACKGROUND_ALPHA}`,
+        fill: true,
+        tension: Graph.CHART_DEFAULTS.TENSION,
+        pointRadius: Graph.CHART_DEFAULTS.POINT_RADIUS,
+        stack: 'languages',
       };
     });
   }
