@@ -10,7 +10,7 @@ export class Size {
   readonly height: number;
 
   private static readonly PRESET: Record<SizeName, SizePreset> = {
-    small: { width: 700, height: 350 },
+    small: { width: 600, height: 300 },
     medium: { width: 800, height: 400 },
     large: { width: 1000, height: 500 },
   } as const;
