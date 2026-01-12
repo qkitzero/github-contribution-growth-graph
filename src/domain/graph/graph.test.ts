@@ -1,4 +1,5 @@
 import { Contribution } from '../contribution/contribution';
+import { Language } from '../language/language';
 import { Graph } from './graph';
 
 describe('Graph', () => {
@@ -28,7 +29,7 @@ describe('Graph', () => {
     });
   });
 
-  describe('generate', () => {
+  describe('generateFromContributions', () => {
     it('should generate PNG buffer from contributions', async () => {
       const graph = new Graph();
       const contributions = [
@@ -37,7 +38,7 @@ describe('Graph', () => {
         new Contribution(new Date('2025-03-01'), new Date('2025-03-31'), 7, 'commit'),
       ];
 
-      const buffer = await graph.generate(contributions);
+      const buffer = await graph.generateFromContributions(contributions);
 
       expect(buffer).toBeInstanceOf(Buffer);
       expect(buffer.length).toBeGreaterThan(0);
@@ -50,7 +51,7 @@ describe('Graph', () => {
       const graph = new Graph();
       const contributions: Contribution[] = [];
 
-      const buffer = await graph.generate(contributions);
+      const buffer = await graph.generateFromContributions(contributions);
 
       expect(buffer).toBeInstanceOf(Buffer);
       expect(buffer.length).toBeGreaterThan(0);
@@ -61,9 +62,11 @@ describe('Graph', () => {
 
     it('should handle single contribution', async () => {
       const graph = new Graph();
-      const contributions = [new Contribution(new Date('2025-01-01'), new Date('2025-01-31'), 10, 'commit')];
+      const contributions = [
+        new Contribution(new Date('2025-01-01'), new Date('2025-01-31'), 10, 'commit'),
+      ];
 
-      const buffer = await graph.generate(contributions);
+      const buffer = await graph.generateFromContributions(contributions);
 
       expect(buffer).toBeInstanceOf(Buffer);
       expect(buffer.length).toBeGreaterThan(0);
@@ -80,7 +83,7 @@ describe('Graph', () => {
         new Contribution(new Date('2025-02-01'), new Date('2025-02-28'), 3, 'commit'),
       ];
 
-      const buffer = await graph.generate(unsortedContributions);
+      const buffer = await graph.generateFromContributions(unsortedContributions);
 
       expect(buffer).toBeInstanceOf(Buffer);
       expect(buffer.length).toBeGreaterThan(0);
@@ -97,7 +100,7 @@ describe('Graph', () => {
         new Contribution(new Date('2025-03-01'), new Date('2025-03-31'), 7, 'commit'),
       ];
 
-      const buffer = await graph.generate(contributions);
+      const buffer = await graph.generateFromContributions(contributions);
 
       expect(buffer).toBeInstanceOf(Buffer);
       expect(buffer.length).toBeGreaterThan(0);
@@ -114,7 +117,7 @@ describe('Graph', () => {
         new Contribution(new Date('2025-03-01'), new Date('2025-03-31'), 0, 'commit'),
       ];
 
-      const buffer = await graph.generate(contributions);
+      const buffer = await graph.generateFromContributions(contributions);
 
       expect(buffer).toBeInstanceOf(Buffer);
       expect(buffer.length).toBeGreaterThan(0);
@@ -125,11 +128,13 @@ describe('Graph', () => {
 
     it('should generate graph with different themes', async () => {
       const themes = ['default', 'red', 'green', 'dark', 'light'];
-      const contributions = [new Contribution(new Date('2025-01-01'), new Date('2025-01-31'), 10, 'commit')];
+      const contributions = [
+        new Contribution(new Date('2025-01-01'), new Date('2025-01-31'), 10, 'commit'),
+      ];
 
       for (const theme of themes) {
         const graph = new Graph(theme);
-        const buffer = await graph.generate(contributions);
+        const buffer = await graph.generateFromContributions(contributions);
 
         expect(buffer).toBeInstanceOf(Buffer);
         expect(buffer.length).toBeGreaterThan(0);
@@ -141,12 +146,87 @@ describe('Graph', () => {
 
     it('should generate graph with different sizes', async () => {
       const sizes = ['small', 'medium', 'large'];
-      const contributions = [new Contribution(new Date('2025-01-01'), new Date('2025-01-31'), 10, 'commit')];
+      const contributions = [
+        new Contribution(new Date('2025-01-01'), new Date('2025-01-31'), 10, 'commit'),
+      ];
       const buffers: Buffer[] = [];
 
       for (const size of sizes) {
         const graph = new Graph(undefined, size);
-        const buffer = await graph.generate(contributions);
+        const buffer = await graph.generateFromContributions(contributions);
+
+        expect(buffer).toBeInstanceOf(Buffer);
+        expect(buffer.length).toBeGreaterThan(0);
+        expect(buffer.subarray(0, 8)).toEqual(
+          Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]),
+        );
+        buffers.push(buffer);
+      }
+
+      expect(buffers[0].length).not.toBe(buffers[1].length);
+      expect(buffers[1].length).not.toBe(buffers[2].length);
+    });
+  });
+
+  describe('generateFromLanguages', () => {
+    it('should generate PNG buffer from languages', async () => {
+      const graph = new Graph();
+      const languages = [
+        new Language(new Date('2025-01-01'), new Date('2025-01-31'), 'TypeScript', '#3178c6', 100),
+        new Language(new Date('2025-02-01'), new Date('2025-02-28'), 'TypeScript', '#3178c6', 100),
+        new Language(new Date('2025-03-01'), new Date('2025-03-31'), 'TypeScript', '#3178c6', 100),
+      ];
+
+      const buffer = await graph.generateFromLanguages(languages);
+
+      expect(buffer).toBeInstanceOf(Buffer);
+      expect(buffer.length).toBeGreaterThan(0);
+      expect(buffer.subarray(0, 8)).toEqual(
+        Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]),
+      );
+    });
+
+    it('should generate graph with empty languages', async () => {
+      const graph = new Graph();
+      const languages: Language[] = [];
+
+      const buffer = await graph.generateFromLanguages(languages);
+
+      expect(buffer).toBeInstanceOf(Buffer);
+      expect(buffer.length).toBeGreaterThan(0);
+      expect(buffer.subarray(0, 8)).toEqual(
+        Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]),
+      );
+    });
+
+    it('should generate graph with different themes for languages', async () => {
+      const themes = ['default', 'red', 'green', 'dark', 'light'];
+      const languages = [
+        new Language(new Date('2025-01-01'), new Date('2025-01-31'), 'TypeScript', '#3178c6', 100),
+      ];
+
+      for (const theme of themes) {
+        const graph = new Graph(theme);
+        const buffer = await graph.generateFromLanguages(languages);
+
+        expect(buffer).toBeInstanceOf(Buffer);
+        expect(buffer.length).toBeGreaterThan(0);
+        expect(buffer.subarray(0, 8)).toEqual(
+          Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]),
+        );
+      }
+    });
+
+    it('should generate graph with different sizes for languages', async () => {
+      const sizes = ['small', 'medium', 'large'];
+      const languages = [
+        new Language(new Date('2025-01-01'), new Date('2025-01-31'), 'TypeScript', '#3178c6', 100),
+      ];
+      const buffers: Buffer[] = [];
+
+      for (const size of sizes) {
+        const graph = new Graph(undefined, size);
+        const buffer = await graph.generateFromLanguages(languages);
 
         expect(buffer).toBeInstanceOf(Buffer);
         expect(buffer.length).toBeGreaterThan(0);
