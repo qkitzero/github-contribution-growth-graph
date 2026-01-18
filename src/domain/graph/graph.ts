@@ -156,7 +156,7 @@ export class Graph {
             title: { display: false, text: 'Period' },
           },
           y: {
-            title: { display: true, text: yAxisTitle },
+            title: { display: false, text: yAxisTitle },
             beginAtZero: true,
           },
         },
