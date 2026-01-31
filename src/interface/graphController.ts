@@ -1,8 +1,12 @@
 import { Request, Response } from 'express';
 import { GraphUseCase } from '../application/graphUseCase';
+import { LoggingUseCase } from '../application/loggingUseCase';
 
 export class GraphController {
-  constructor(private readonly graphUseCase: GraphUseCase) {}
+  constructor(
+    private readonly loggingUseCase: LoggingUseCase,
+    private readonly graphUseCase: GraphUseCase,
+  ) {}
 
   getContributionsGraph = async (req: Request, res: Response) => {
     const { user, from, to, theme, size, types } = req.query as {
@@ -13,6 +17,12 @@ export class GraphController {
       size?: string;
       types?: string;
     };
+
+    this.loggingUseCase.createLog(
+      'github-contribution-growth-graph',
+      'INFO',
+      `User ${user} created contributions graph with from=${from}, to=${to}, theme=${theme}, size=${size}, types=${types}`,
+    );
 
     const image = await this.graphUseCase.createContributionsGraph(
       user,
@@ -34,6 +44,12 @@ export class GraphController {
       to?: string;
       size?: string;
     };
+
+    this.loggingUseCase.createLog(
+      'github-contribution-growth-graph',
+      'INFO',
+      `User ${user} created languages graph with from=${from}, to=${to}, size=${size}`,
+    );
 
     const image = await this.graphUseCase.createLanguagesGraph(user, from, to, size);
 
