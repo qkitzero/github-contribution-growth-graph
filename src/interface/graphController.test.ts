@@ -1,14 +1,18 @@
 import { Request, Response } from 'express';
 import { GraphUseCase } from '../application/graphUseCase';
+import { LoggingUseCase } from '../application/loggingUseCase';
 import { GraphController } from './graphController';
 
 describe('GraphController', () => {
   const setup = () => {
+    const mockLoggingUseCase: jest.Mocked<LoggingUseCase> = {
+      createLog: jest.fn(),
+    };
     const mockGraphUseCase: jest.Mocked<GraphUseCase> = {
       createContributionsGraph: jest.fn(),
       createLanguagesGraph: jest.fn(),
     };
-    const graphController = new GraphController(mockGraphUseCase);
+    const graphController = new GraphController(mockLoggingUseCase, mockGraphUseCase);
     return { mockGraphUseCase, graphController };
   };
 
