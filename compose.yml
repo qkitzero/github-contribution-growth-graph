@@ -3,11 +3,61 @@ services:
     build:
       context: .
       dockerfile: ./Dockerfile
+      secrets:
+        - npmrc
     container_name: github-contribution-growth-graph-server
     restart: always
     environment:
       - ENV=${ENV}
       - PORT=${SERVER_CONTAINER_PORT}
       - GITHUB_TOKEN=${GITHUB_TOKEN}
+      - LOGGING_SERVICE_HOST=${LOGGING_SERVER_HOST}
+      - LOGGING_SERVICE_PORT=${LOGGING_SERVER_CONTAINER_PORT}
     ports:
       - "${SERVER_HOST_PORT}:${SERVER_CONTAINER_PORT}"
+
+  logging-server:
+    build:
+      context: ../logging-service
+      dockerfile: ./Dockerfile
+      secrets:
+        - npmrc
+    container_name: github-contribution-growth-graph-logging-server
+    restart: always
+    environment:
+      - ENV=${ENV}
+      - PORT=${LOGGING_SERVER_CONTAINER_PORT}
+      - DB_URL=${LOGGING_DB_URL}
+      - AUTH_SERVICE_HOST=${AUTH_GRPC_GATEWAY_HOST}
+      - AUTH_SERVICE_PORT=${AUTH_GRPC_GATEWAY_CONTAINER_PORT}
+    depends_on:
+      logging-db:
+        condition: service_healthy
+    ports:
+      - "${LOGGING_SERVER_HOST_PORT}:${LOGGING_SERVER_CONTAINER_PORT}"
+
+  logging-db:
+    image: postgres:17
+    container_name: github-contribution-growth-graph-logging-db
+    restart: always
+    environment:
+      POSTGRES_DB: ${LOGGING_DB_NAME}
+      POSTGRES_USER: ${LOGGING_DB_USER}
+      POSTGRES_PASSWORD: ${LOGGING_DB_PASSWORD}
+    ports:
+      - "${LOGGING_DB_HOST_PORT}:${LOGGING_DB_CONTAINER_PORT}"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${LOGGING_DB_USER}"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 10s
+    volumes:
+      - github-contribution-growth-graph-logging-db-data:/var/lib/postgresql/data
+
+volumes:
+  github-contribution-growth-graph-logging-db-data:
+
+secrets:
+  npmrc:
+    file: .npmrc
