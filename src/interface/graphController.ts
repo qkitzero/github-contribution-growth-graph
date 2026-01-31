@@ -18,7 +18,7 @@ export class GraphController {
       types?: string;
     };
 
-    await this.loggingUseCase.createLog(
+    this.loggingUseCase.createLog(
       'github-contribution-growth-graph',
       'INFO',
       `User ${user} created contributions graph with from=${from}, to=${to}, theme=${theme}, size=${size}, types=${types}`,
@@ -45,7 +45,7 @@ export class GraphController {
       size?: string;
     };
 
-    await this.loggingUseCase.createLog(
+    this.loggingUseCase.createLog(
       'github-contribution-growth-graph',
       'INFO',
       `User ${user} created languages graph with from=${from}, to=${to}, size=${size}`,
