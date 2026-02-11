@@ -10,7 +10,7 @@
     "generate:logging:openapi": "swagger2openapi ./node_modules/@qkitzero/logging-service-openapi/gen/openapi.json -o ./src/infrastructure/api/logging/openapi.json",
     "generate:auth:schema": "openapi-typescript ./src/infrastructure/api/auth/openapi.json -o ./src/infrastructure/api/auth/schema.ts",
     "generate:logging:schema": "openapi-typescript ./src/infrastructure/api/logging/openapi.json -o ./src/infrastructure/api/logging/schema.ts",
-    "generate:all": "npm run generate:auth:openapi && npm run generate:auth:schema && generate:logging:openapi && npm run generate:logging:schema",
+    "generate:all": "npm run generate:auth:openapi && npm run generate:auth:schema && npm run generate:logging:openapi && npm run generate:logging:schema",
     "build": "rimraf dist && tsc",
     "start": "node dist/server.js",
     "dev": "ts-node-dev --respawn --transpile-only src/server.ts",
