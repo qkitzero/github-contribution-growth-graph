@@ -5,6 +5,7 @@ import {
   ContributionType,
 } from '../../../domain/contribution/contribution';
 import { Language } from '../../../domain/language/language';
+import { GitHubClient } from '../../../application/githubClient';
 
 const TOTAL_CONTRIBUTIONS_QUERY = gql`
   query ($userName: String!, $from: DateTime!, $to: DateTime!) {
@@ -127,12 +128,7 @@ type LanguageContributionsResponse = {
   };
 };
 
-export interface Client {
-  getTotalContributions(userName: string, from: string, to: string): Promise<Contribution[]>;
-  getLanguageContributions(userName: string, from: string, to: string): Promise<Language[]>;
-}
-
-export class ClientImpl implements Client {
+export class GitHubClientImpl implements GitHubClient {
   private client: GraphQLClient;
 
   constructor(token?: string) {
