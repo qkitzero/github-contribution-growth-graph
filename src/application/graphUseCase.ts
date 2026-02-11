@@ -1,6 +1,7 @@
 import { Contribution } from '../domain/contribution/contribution';
 import { Graph } from '../domain/graph/graph';
 import { Language } from '../domain/language/language';
+import { AuthService } from './authService';
 import { GitHubClient } from './githubClient';
 import { LoggingService } from './loggingService';
 
@@ -25,6 +26,7 @@ export class GraphUseCaseImpl implements GraphUseCase {
   private static readonly LOGGING_EXCLUDE_USERS = ['qkitzero'];
 
   constructor(
+    private readonly authService: AuthService,
     private readonly loggingService: LoggingService,
     private readonly githubClient: GitHubClient,
   ) {}
@@ -38,7 +40,9 @@ export class GraphUseCaseImpl implements GraphUseCase {
     types?: string,
   ): Promise<Buffer> {
     if (!GraphUseCaseImpl.LOGGING_EXCLUDE_USERS.includes(user)) {
+      const token = await this.authService.getM2MToken();
       this.loggingService.createLog(
+        token,
         'github-contribution-growth-graph',
         'INFO',
         `User ${user} created contributions graph with from=${from}, to=${to}, theme=${theme}, size=${size}, types=${types}`,
@@ -63,7 +67,9 @@ export class GraphUseCaseImpl implements GraphUseCase {
     size?: string,
   ): Promise<Buffer> {
     if (!GraphUseCaseImpl.LOGGING_EXCLUDE_USERS.includes(user)) {
+      const token = await this.authService.getM2MToken();
       this.loggingService.createLog(
+        token,
         'github-contribution-growth-graph',
         'INFO',
         `User ${user} created languages graph with from=${from}, to=${to}, size=${size}`,
