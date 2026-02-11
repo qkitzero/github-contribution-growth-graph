@@ -1,11 +1,15 @@
 import { Contribution, CONTRIBUTION_TYPES } from '../domain/contribution/contribution';
 import { Language } from '../domain/language/language';
+import { AuthService } from './authService';
 import { GitHubClient } from './githubClient';
 import { GraphUseCaseImpl } from './graphUseCase';
 import { LoggingService } from './loggingService';
 
 describe('GraphUseCase', () => {
   const setup = () => {
+    const mockAuthService: jest.Mocked<AuthService> = {
+      getM2MToken: jest.fn(),
+    };
     const mockLoggingService: jest.Mocked<LoggingService> = {
       createLog: jest.fn(),
     };
@@ -13,8 +17,12 @@ describe('GraphUseCase', () => {
       getTotalContributions: jest.fn(),
       getLanguageContributions: jest.fn(),
     };
-    const graphUseCase = new GraphUseCaseImpl(mockLoggingService, mockGitHubClient);
-    return { mockLoggingService, mockGitHubClient, graphUseCase };
+    const graphUseCase = new GraphUseCaseImpl(
+      mockAuthService,
+      mockLoggingService,
+      mockGitHubClient,
+    );
+    return { mockAuthService, mockLoggingService, mockGitHubClient, graphUseCase };
   };
 
   describe('createContributionsGraph', () => {
