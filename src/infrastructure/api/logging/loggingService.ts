@@ -1,5 +1,5 @@
 import createClient from 'openapi-fetch';
-import { LoggingUseCase } from '../../../application/loggingUseCase';
+import { LoggingService } from '../../../application/loggingService';
 import { paths } from './schema';
 
 export class LoggingError extends Error {
@@ -9,7 +9,7 @@ export class LoggingError extends Error {
   }
 }
 
-export class LoggingUseCaseImpl implements LoggingUseCase {
+export class LoggingServiceImpl implements LoggingService {
   constructor(private readonly client: ReturnType<typeof createClient<paths>>) {}
 
   async createLog(serviceName: string, level: string, message: string): Promise<string> {

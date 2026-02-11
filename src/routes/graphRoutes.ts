@@ -1,8 +1,8 @@
 import { Router } from 'express';
 import createClient from 'openapi-fetch';
 import { GraphUseCaseImpl } from '../application/graphUseCase';
-import { ClientImpl as GithubClientImpl } from '../infrastructure/api/github/client';
-import { LoggingUseCaseImpl } from '../infrastructure/api/logging/loggingUseCase';
+import { GitHubClientImpl } from '../infrastructure/api/github/client';
+import { LoggingServiceImpl } from '../infrastructure/api/logging/loggingService';
 import { paths } from '../infrastructure/api/logging/schema';
 import { GraphController } from '../interface/graphController';
 
@@ -14,12 +14,12 @@ const loggingClientPort = process.env.LOGGING_SERVICE_PORT;
 const loggingClientBaseUrl = `${loggingClientProtocol}://${loggingClientHost}:${loggingClientPort}`;
 const loggingClient = createClient<paths>({ baseUrl: loggingClientBaseUrl });
 
-const githubClient = new GithubClientImpl(process.env.GITHUB_TOKEN);
+const loggingService = new LoggingServiceImpl(loggingClient);
+const githubClient = new GitHubClientImpl(process.env.GITHUB_TOKEN);
 
-const loggingUseCase = new LoggingUseCaseImpl(loggingClient);
-const graphUseCase = new GraphUseCaseImpl(githubClient);
+const graphUseCase = new GraphUseCaseImpl(loggingService, githubClient);
 
-const graphController = new GraphController(loggingUseCase, graphUseCase);
+const graphController = new GraphController(graphUseCase);
 
 router.get('/contributions', graphController.getContributionsGraph);
 router.get('/languages', graphController.getLanguagesGraph);
