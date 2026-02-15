@@ -4,7 +4,7 @@
  */
 
 export interface paths {
-    "/logs": {
+    "/v1/logs": {
         parameters: {
             query?: never;
             header?: never;
