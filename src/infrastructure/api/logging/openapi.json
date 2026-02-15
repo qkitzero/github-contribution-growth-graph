@@ -7,7 +7,7 @@
     },
     "servers": [
         {
-            "url": "v1"
+            "url": "/"
         }
     ],
     "components": {
@@ -124,7 +124,7 @@
         "parameters": {}
     },
     "paths": {
-        "/logs": {
+        "/v1/logs": {
             "post": {
                 "description": "",
                 "summary": "",
