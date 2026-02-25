@@ -1,0 +1,17 @@
+[
+  {
+    "name": "delete-old-images",
+    "action": { "type": "Delete" },
+    "condition": {
+      "olderThan": "604800s",
+      "tagState": "any"
+    }
+  },
+  {
+    "name": "keep-minimum-versions",
+    "action": { "type": "Keep" },
+    "mostRecentVersions": {
+      "keepCount": 2
+    }
+  }
+]

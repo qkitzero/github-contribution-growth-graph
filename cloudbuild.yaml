@@ -16,7 +16,7 @@ steps:
       - build
       - --secret=id=npmrc,source=.npmrc
       - -t
-      - us-central1-docker.pkg.dev/$PROJECT_ID/github-contribution-growth-graph/$COMMIT_SHA
+      - us-central1-docker.pkg.dev/$PROJECT_ID/github-contribution-growth-graph/github-contribution-growth-graph:$COMMIT_SHA
       - -f
       - ./Dockerfile
       - .
@@ -24,7 +24,18 @@ steps:
   - name: gcr.io/cloud-builders/docker
     args:
       - push
-      - us-central1-docker.pkg.dev/$PROJECT_ID/github-contribution-growth-graph/$COMMIT_SHA
+      - us-central1-docker.pkg.dev/$PROJECT_ID/github-contribution-growth-graph/github-contribution-growth-graph:$COMMIT_SHA
+
+  - name: gcr.io/google.com/cloudsdktool/cloud-sdk
+    entrypoint: bash
+    args:
+      - -c
+      - |
+        gcloud artifacts repositories set-cleanup-policies github-contribution-growth-graph \
+          --project=$PROJECT_ID \
+          --location=us-central1 \
+          --policy=cleanup-policy.json \
+          --no-dry-run
 
   - name: gcr.io/google.com/cloudsdktool/cloud-sdk
     entrypoint: bash
@@ -33,7 +44,7 @@ steps:
       - |
         gcloud secrets versions access latest --secret=github-contribution-growth-graph-env-file > .env
         gcloud run deploy github-contribution-growth-graph \
-          --image=us-central1-docker.pkg.dev/$PROJECT_ID/github-contribution-growth-graph/$COMMIT_SHA \
+          --image=us-central1-docker.pkg.dev/$PROJECT_ID/github-contribution-growth-graph/github-contribution-growth-graph:$COMMIT_SHA \
           --region=us-central1 \
           --platform=managed \
           --min-instances=0 \
@@ -47,7 +58,7 @@ steps:
           --set-env-vars=$$(cat .env | xargs | sed 's/ /,/g')
 
 images:
-  - us-central1-docker.pkg.dev/$PROJECT_ID/github-contribution-growth-graph/$COMMIT_SHA
+  - us-central1-docker.pkg.dev/$PROJECT_ID/github-contribution-growth-graph/github-contribution-growth-graph:$COMMIT_SHA
 
 options:
   logging: CLOUD_LOGGING_ONLY
