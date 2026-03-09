@@ -6,6 +6,7 @@ import { paths as authPaths } from '../infrastructure/api/auth/schema';
 import { GitHubClientImpl } from '../infrastructure/api/github/client';
 import { LoggingServiceImpl } from '../infrastructure/api/logging/loggingService';
 import { paths as loggingPaths } from '../infrastructure/api/logging/schema';
+import { ChartjsGraphRenderer } from '../infrastructure/chart/chartjsGraphRenderer';
 import { GraphController } from '../interface/graphController';
 
 const router = Router();
@@ -27,8 +28,9 @@ const loggingClient = createClient<loggingPaths>({ baseUrl: loggingClientBaseUrl
 const authService = new AuthServiceImpl(authClient, authM2MClientId, authM2MClientSecret);
 const loggingService = new LoggingServiceImpl(loggingClient);
 const githubClient = new GitHubClientImpl(process.env.GITHUB_TOKEN);
+const graphRenderer = new ChartjsGraphRenderer();
 
-const graphUseCase = new GraphUseCaseImpl(authService, loggingService, githubClient);
+const graphUseCase = new GraphUseCaseImpl(authService, loggingService, githubClient, graphRenderer);
 
 const graphController = new GraphController(graphUseCase);
 

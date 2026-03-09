@@ -1,33 +1,28 @@
 import { ChartConfiguration, ChartDataset } from 'chart.js';
 import { ChartJSNodeCanvas } from 'chartjs-node-canvas';
+import { GraphRenderer } from '../../application/graphRenderer';
 import {
   AggregatedContributions,
   Contribution,
   Contributions,
   ContributionType,
-} from '../contribution/contribution';
-import { AggregatedLanguages, Language, Languages } from '../language/language';
-import { Size } from './size';
-import { Theme } from './theme';
+} from '../../domain/contribution/contribution';
+import { Size } from '../../domain/graph/size';
+import { Theme } from '../../domain/graph/theme';
+import { AggregatedLanguages, Language, Languages } from '../../domain/language/language';
 
-export class Graph {
+export class ChartjsGraphRenderer implements GraphRenderer {
   private static readonly CHART_DEFAULTS = {
     TENSION: 0.1,
     POINT_RADIUS: 0,
     BACKGROUND_ALPHA: '80',
   } as const;
 
-  private chartJSNodeCanvas: ChartJSNodeCanvas;
-  private theme: Theme;
-  private size: Size;
-
-  constructor(theme?: string, size?: string) {
-    this.theme = new Theme(theme);
-    this.size = new Size(size);
-    this.chartJSNodeCanvas = new ChartJSNodeCanvas({
-      width: this.size.width,
-      height: this.size.height,
-      backgroundColour: this.theme.backgroundColor,
+  private createCanvas(size: Size, theme: Theme): ChartJSNodeCanvas {
+    return new ChartJSNodeCanvas({
+      width: size.width,
+      height: size.height,
+      backgroundColour: theme.backgroundColor,
       chartCallback: (ChartJS) => {
         ChartJS.defaults.responsive = true;
         ChartJS.defaults.maintainAspectRatio = false;
@@ -35,16 +30,29 @@ export class Graph {
     });
   }
 
-  async generateFromContributions(contributions: Contribution[]): Promise<Buffer> {
+  async renderContributions(
+    contributions: Contribution[],
+    theme?: string,
+    size?: string,
+  ): Promise<Buffer> {
+    const themeObj = new Theme(theme);
+    const sizeObj = new Size(size);
+    const canvas = this.createCanvas(sizeObj, themeObj);
+
     const contributionsCollection = new Contributions(contributions);
 
     if (contributionsCollection.isEmpty) {
-      return this.generateEmptyChart();
+      return this.generateEmptyChart(canvas);
     }
 
     const aggregated = contributionsCollection.aggregate();
     const periods = contributionsCollection.getAllPeriods(aggregated);
-    const datasets = this.createContributionDatasets(contributionsCollection, aggregated, periods);
+    const datasets = this.createContributionDatasets(
+      contributionsCollection,
+      aggregated,
+      periods,
+      themeObj,
+    );
 
     const chartConfiguration = this.createChartConfiguration(
       periods,
@@ -53,14 +61,18 @@ export class Graph {
       'Cumulative Contributions',
     );
 
-    return await this.chartJSNodeCanvas.renderToBuffer(chartConfiguration);
+    return await canvas.renderToBuffer(chartConfiguration);
   }
 
-  async generateFromLanguages(languages: Language[]): Promise<Buffer> {
+  async renderLanguages(languages: Language[], theme?: string, size?: string): Promise<Buffer> {
+    const themeObj = new Theme(theme);
+    const sizeObj = new Size(size);
+    const canvas = this.createCanvas(sizeObj, themeObj);
+
     const languagesCollection = new Languages(languages);
 
     if (languagesCollection.isEmpty) {
-      return this.generateEmptyChart();
+      return this.generateEmptyChart(canvas);
     }
 
     const aggregated = languagesCollection.aggregate();
@@ -74,11 +86,11 @@ export class Graph {
       'Cumulative Code Size (bytes)',
     );
 
-    return await this.chartJSNodeCanvas.renderToBuffer(chartConfiguration);
+    return await canvas.renderToBuffer(chartConfiguration);
   }
 
-  private generateEmptyChart(): Promise<Buffer> {
-    return this.chartJSNodeCanvas.renderToBuffer({
+  private generateEmptyChart(canvas: ChartJSNodeCanvas): Promise<Buffer> {
+    return canvas.renderToBuffer({
       type: 'line',
       data: { labels: [], datasets: [] },
       options: {
@@ -93,22 +105,23 @@ export class Graph {
     contributions: Contributions,
     aggregated: AggregatedContributions,
     periods: string[],
+    theme: Theme,
   ): ChartDataset<'line'>[] {
     const orderedTypes = contributions.getOrderedTypes(aggregated);
 
     return orderedTypes.map((type: ContributionType) => {
       const periodData = aggregated.get(type)!;
-      const color = this.theme.getColorForType(type);
+      const color = theme.getColorForType(type);
       const cumulativeData = contributions.calculateCumulative(periodData, periods);
 
       return {
         label: type,
         data: cumulativeData,
         borderColor: color,
-        backgroundColor: `${color}${Graph.CHART_DEFAULTS.BACKGROUND_ALPHA}`,
+        backgroundColor: `${color}${ChartjsGraphRenderer.CHART_DEFAULTS.BACKGROUND_ALPHA}`,
         fill: true,
-        tension: Graph.CHART_DEFAULTS.TENSION,
-        pointRadius: Graph.CHART_DEFAULTS.POINT_RADIUS,
+        tension: ChartjsGraphRenderer.CHART_DEFAULTS.TENSION,
+        pointRadius: ChartjsGraphRenderer.CHART_DEFAULTS.POINT_RADIUS,
         stack: 'contributions',
       };
     });
@@ -129,10 +142,10 @@ export class Graph {
         label: langName,
         data: cumulativeData,
         borderColor: color,
-        backgroundColor: `${color}${Graph.CHART_DEFAULTS.BACKGROUND_ALPHA}`,
+        backgroundColor: `${color}${ChartjsGraphRenderer.CHART_DEFAULTS.BACKGROUND_ALPHA}`,
         fill: true,
-        tension: Graph.CHART_DEFAULTS.TENSION,
-        pointRadius: Graph.CHART_DEFAULTS.POINT_RADIUS,
+        tension: ChartjsGraphRenderer.CHART_DEFAULTS.TENSION,
+        pointRadius: ChartjsGraphRenderer.CHART_DEFAULTS.POINT_RADIUS,
         stack: 'languages',
       };
     });
