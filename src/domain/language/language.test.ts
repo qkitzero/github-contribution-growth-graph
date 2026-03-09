@@ -1,4 +1,4 @@
-import { Language } from './language';
+import { Language, Languages } from './language';
 
 describe('Language', () => {
   describe('constructor', () => {
@@ -51,6 +51,21 @@ describe('Language', () => {
       expect(language.name).toBe(name);
       expect(language.color).toBe(color);
       expect(language.size).toBe(size);
+    });
+  });
+});
+
+describe('Languages', () => {
+  describe('getOrderedLanguages', () => {
+    it('should return languages ordered by total size descending', () => {
+      const languages = new Languages([
+        new Language(new Date('2025-01-01'), new Date('2025-01-31'), 'TypeScript', '#3178c6', 5000),
+        new Language(new Date('2025-01-01'), new Date('2025-01-31'), 'Python', '#3572A5', 8000),
+        new Language(new Date('2025-01-01'), new Date('2025-01-31'), 'JavaScript', '#f1e05a', 3000),
+      ]);
+      const aggregated = languages.aggregate();
+      const ordered = languages.getOrderedLanguages(aggregated);
+      expect(ordered).toEqual(['Python', 'TypeScript', 'JavaScript']);
     });
   });
 });
