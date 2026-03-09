@@ -1,44 +1,18 @@
-import { Contribution } from '../contribution/contribution';
-import { Language } from '../language/language';
-import { Graph } from './graph';
+import { Contribution } from '../../domain/contribution/contribution';
+import { Language } from '../../domain/language/language';
+import { ChartjsGraphRenderer } from './chartjsGraphRenderer';
 
-describe('Graph', () => {
-  describe('constructor', () => {
-    it('should create graph with default theme and size', () => {
-      const graph = new Graph();
-
-      expect(graph).toBeInstanceOf(Graph);
-    });
-
-    it('should create graph with specified theme', () => {
-      const graph = new Graph('red');
-
-      expect(graph).toBeInstanceOf(Graph);
-    });
-
-    it('should create graph with specified size', () => {
-      const graph = new Graph(undefined, 'large');
-
-      expect(graph).toBeInstanceOf(Graph);
-    });
-
-    it('should create graph with specified theme and size', () => {
-      const graph = new Graph('dark', 'small');
-
-      expect(graph).toBeInstanceOf(Graph);
-    });
-  });
-
-  describe('generateFromContributions', () => {
+describe('ChartjsGraphRenderer', () => {
+  describe('renderContributions', () => {
     it('should generate PNG buffer from contributions', async () => {
-      const graph = new Graph();
+      const renderer = new ChartjsGraphRenderer();
       const contributions = [
         new Contribution(new Date('2025-01-01'), new Date('2025-01-31'), 5, 'commit'),
         new Contribution(new Date('2025-02-01'), new Date('2025-02-28'), 3, 'commit'),
         new Contribution(new Date('2025-03-01'), new Date('2025-03-31'), 7, 'commit'),
       ];
 
-      const buffer = await graph.generateFromContributions(contributions);
+      const buffer = await renderer.renderContributions(contributions);
 
       expect(buffer).toBeInstanceOf(Buffer);
       expect(buffer.length).toBeGreaterThan(0);
@@ -48,10 +22,10 @@ describe('Graph', () => {
     });
 
     it('should generate graph with empty contributions', async () => {
-      const graph = new Graph();
+      const renderer = new ChartjsGraphRenderer();
       const contributions: Contribution[] = [];
 
-      const buffer = await graph.generateFromContributions(contributions);
+      const buffer = await renderer.renderContributions(contributions);
 
       expect(buffer).toBeInstanceOf(Buffer);
       expect(buffer.length).toBeGreaterThan(0);
@@ -61,12 +35,12 @@ describe('Graph', () => {
     });
 
     it('should handle single contribution', async () => {
-      const graph = new Graph();
+      const renderer = new ChartjsGraphRenderer();
       const contributions = [
         new Contribution(new Date('2025-01-01'), new Date('2025-01-31'), 10, 'commit'),
       ];
 
-      const buffer = await graph.generateFromContributions(contributions);
+      const buffer = await renderer.renderContributions(contributions);
 
       expect(buffer).toBeInstanceOf(Buffer);
       expect(buffer.length).toBeGreaterThan(0);
@@ -76,14 +50,14 @@ describe('Graph', () => {
     });
 
     it('should not mutate the input contributions array', async () => {
-      const graph = new Graph();
+      const renderer = new ChartjsGraphRenderer();
       const unsortedContributions = [
         new Contribution(new Date('2025-03-01'), new Date('2025-03-31'), 7, 'commit'),
         new Contribution(new Date('2025-01-01'), new Date('2025-01-31'), 5, 'commit'),
         new Contribution(new Date('2025-02-01'), new Date('2025-02-28'), 3, 'commit'),
       ];
 
-      const buffer = await graph.generateFromContributions(unsortedContributions);
+      const buffer = await renderer.renderContributions(unsortedContributions);
 
       expect(buffer).toBeInstanceOf(Buffer);
       expect(buffer.length).toBeGreaterThan(0);
@@ -93,14 +67,14 @@ describe('Graph', () => {
     });
 
     it('should calculate cumulative totals correctly', async () => {
-      const graph = new Graph();
+      const renderer = new ChartjsGraphRenderer();
       const contributions = [
         new Contribution(new Date('2025-01-01'), new Date('2025-01-31'), 5, 'commit'),
         new Contribution(new Date('2025-02-01'), new Date('2025-02-28'), 3, 'commit'),
         new Contribution(new Date('2025-03-01'), new Date('2025-03-31'), 7, 'commit'),
       ];
 
-      const buffer = await graph.generateFromContributions(contributions);
+      const buffer = await renderer.renderContributions(contributions);
 
       expect(buffer).toBeInstanceOf(Buffer);
       expect(buffer.length).toBeGreaterThan(0);
@@ -110,14 +84,14 @@ describe('Graph', () => {
     });
 
     it('should handle contributions with zero count', async () => {
-      const graph = new Graph();
+      const renderer = new ChartjsGraphRenderer();
       const contributions = [
         new Contribution(new Date('2025-01-01'), new Date('2025-01-31'), 0, 'commit'),
         new Contribution(new Date('2025-02-01'), new Date('2025-02-28'), 5, 'commit'),
         new Contribution(new Date('2025-03-01'), new Date('2025-03-31'), 0, 'commit'),
       ];
 
-      const buffer = await graph.generateFromContributions(contributions);
+      const buffer = await renderer.renderContributions(contributions);
 
       expect(buffer).toBeInstanceOf(Buffer);
       expect(buffer.length).toBeGreaterThan(0);
@@ -133,8 +107,8 @@ describe('Graph', () => {
       ];
 
       for (const theme of themes) {
-        const graph = new Graph(theme);
-        const buffer = await graph.generateFromContributions(contributions);
+        const renderer = new ChartjsGraphRenderer();
+        const buffer = await renderer.renderContributions(contributions, theme);
 
         expect(buffer).toBeInstanceOf(Buffer);
         expect(buffer.length).toBeGreaterThan(0);
@@ -152,8 +126,8 @@ describe('Graph', () => {
       const buffers: Buffer[] = [];
 
       for (const size of sizes) {
-        const graph = new Graph(undefined, size);
-        const buffer = await graph.generateFromContributions(contributions);
+        const renderer = new ChartjsGraphRenderer();
+        const buffer = await renderer.renderContributions(contributions, undefined, size);
 
         expect(buffer).toBeInstanceOf(Buffer);
         expect(buffer.length).toBeGreaterThan(0);
@@ -168,16 +142,16 @@ describe('Graph', () => {
     });
   });
 
-  describe('generateFromLanguages', () => {
+  describe('renderLanguages', () => {
     it('should generate PNG buffer from languages', async () => {
-      const graph = new Graph();
+      const renderer = new ChartjsGraphRenderer();
       const languages = [
         new Language(new Date('2025-01-01'), new Date('2025-01-31'), 'TypeScript', '#3178c6', 100),
         new Language(new Date('2025-02-01'), new Date('2025-02-28'), 'TypeScript', '#3178c6', 100),
         new Language(new Date('2025-03-01'), new Date('2025-03-31'), 'TypeScript', '#3178c6', 100),
       ];
 
-      const buffer = await graph.generateFromLanguages(languages);
+      const buffer = await renderer.renderLanguages(languages);
 
       expect(buffer).toBeInstanceOf(Buffer);
       expect(buffer.length).toBeGreaterThan(0);
@@ -187,10 +161,10 @@ describe('Graph', () => {
     });
 
     it('should generate graph with empty languages', async () => {
-      const graph = new Graph();
+      const renderer = new ChartjsGraphRenderer();
       const languages: Language[] = [];
 
-      const buffer = await graph.generateFromLanguages(languages);
+      const buffer = await renderer.renderLanguages(languages);
 
       expect(buffer).toBeInstanceOf(Buffer);
       expect(buffer.length).toBeGreaterThan(0);
@@ -206,8 +180,8 @@ describe('Graph', () => {
       ];
 
       for (const theme of themes) {
-        const graph = new Graph(theme);
-        const buffer = await graph.generateFromLanguages(languages);
+        const renderer = new ChartjsGraphRenderer();
+        const buffer = await renderer.renderLanguages(languages, theme);
 
         expect(buffer).toBeInstanceOf(Buffer);
         expect(buffer.length).toBeGreaterThan(0);
@@ -225,8 +199,8 @@ describe('Graph', () => {
       const buffers: Buffer[] = [];
 
       for (const size of sizes) {
-        const graph = new Graph(undefined, size);
-        const buffer = await graph.generateFromLanguages(languages);
+        const renderer = new ChartjsGraphRenderer();
+        const buffer = await renderer.renderLanguages(languages, undefined, size);
 
         expect(buffer).toBeInstanceOf(Buffer);
         expect(buffer.length).toBeGreaterThan(0);

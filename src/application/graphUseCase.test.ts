@@ -2,6 +2,7 @@ import { Contribution, CONTRIBUTION_TYPES } from '../domain/contribution/contrib
 import { Language } from '../domain/language/language';
 import { AuthService } from './authService';
 import { GitHubClient } from './githubClient';
+import { GraphRenderer } from './graphRenderer';
 import { GraphUseCaseImpl } from './graphUseCase';
 import { LoggingService } from './loggingService';
 
@@ -17,12 +18,23 @@ describe('GraphUseCase', () => {
       getTotalContributions: jest.fn(),
       getLanguageContributions: jest.fn(),
     };
+    const mockGraphRenderer: jest.Mocked<GraphRenderer> = {
+      renderContributions: jest.fn(),
+      renderLanguages: jest.fn(),
+    };
     const graphUseCase = new GraphUseCaseImpl(
       mockAuthService,
       mockLoggingService,
       mockGitHubClient,
+      mockGraphRenderer,
     );
-    return { mockAuthService, mockLoggingService, mockGitHubClient, graphUseCase };
+    return {
+      mockAuthService,
+      mockLoggingService,
+      mockGitHubClient,
+      mockGraphRenderer,
+      graphUseCase,
+    };
   };
 
   describe('createContributionsGraph', () => {

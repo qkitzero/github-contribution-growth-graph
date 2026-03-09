@@ -1,8 +1,8 @@
 import { Contribution } from '../domain/contribution/contribution';
-import { Graph } from '../domain/graph/graph';
 import { Language } from '../domain/language/language';
 import { AuthService } from './authService';
 import { GitHubClient } from './githubClient';
+import { GraphRenderer } from './graphRenderer';
 import { LoggingService } from './loggingService';
 
 export interface GraphUseCase {
@@ -29,6 +29,7 @@ export class GraphUseCaseImpl implements GraphUseCase {
     private readonly authService: AuthService,
     private readonly loggingService: LoggingService,
     private readonly githubClient: GitHubClient,
+    private readonly graphRenderer: GraphRenderer,
   ) {}
 
   async createContributionsGraph(
@@ -55,9 +56,7 @@ export class GraphUseCaseImpl implements GraphUseCase {
 
     const contributions = this.filterContributionsByTypes(allContributions, types);
 
-    const graph = new Graph(theme, size);
-
-    return graph.generateFromContributions(contributions);
+    return this.graphRenderer.renderContributions(contributions, theme, size);
   }
 
   async createLanguagesGraph(
@@ -80,9 +79,7 @@ export class GraphUseCaseImpl implements GraphUseCase {
     const monthlyRanges = this.generateMonthlyRanges(fromDate, toDate);
     const allLanguages = await this.fetchAllLanguages(user, monthlyRanges);
 
-    const graph = new Graph(undefined, size);
-
-    return graph.generateFromLanguages(allLanguages);
+    return this.graphRenderer.renderLanguages(allLanguages, undefined, size);
   }
 
   private calculateDateRange(from?: string, to?: string): { fromDate: Date; toDate: Date } {
