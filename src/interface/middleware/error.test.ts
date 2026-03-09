@@ -1,5 +1,7 @@
 import { NextFunction, Request, Response } from 'express';
 import { ErrorMiddleware } from './error';
+import { AuthError } from '../../infrastructure/api/auth/authService';
+import { LoggingError } from '../../infrastructure/api/logging/loggingService';
 
 describe('ErrorMiddleware', () => {
   const setup = () => {
@@ -45,6 +47,42 @@ describe('ErrorMiddleware', () => {
     expect(mockResponse.json).toHaveBeenCalledWith({
       error: 'InternalServerError',
       message: error.message,
+    });
+    expect(mockNext).not.toHaveBeenCalled();
+
+    consoleErrorSpy.mockRestore();
+  });
+
+  it('should return 502 for AuthError', () => {
+    const { mockRequest, mockResponse, mockNext, consoleErrorSpy } = setup();
+
+    const error = new AuthError('Auth failed');
+
+    ErrorMiddleware.handle(error, mockRequest as Request, mockResponse as Response, mockNext);
+
+    expect(consoleErrorSpy).toHaveBeenCalledWith(error.stack);
+    expect(mockResponse.status).toHaveBeenCalledWith(502);
+    expect(mockResponse.json).toHaveBeenCalledWith({
+      error: 'AuthError',
+      message: 'Auth failed',
+    });
+    expect(mockNext).not.toHaveBeenCalled();
+
+    consoleErrorSpy.mockRestore();
+  });
+
+  it('should return 502 for LoggingError', () => {
+    const { mockRequest, mockResponse, mockNext, consoleErrorSpy } = setup();
+
+    const error = new LoggingError('Logging failed');
+
+    ErrorMiddleware.handle(error, mockRequest as Request, mockResponse as Response, mockNext);
+
+    expect(consoleErrorSpy).toHaveBeenCalledWith(error.stack);
+    expect(mockResponse.status).toHaveBeenCalledWith(502);
+    expect(mockResponse.json).toHaveBeenCalledWith({
+      error: 'LoggingError',
+      message: 'Logging failed',
     });
     expect(mockNext).not.toHaveBeenCalled();
 
