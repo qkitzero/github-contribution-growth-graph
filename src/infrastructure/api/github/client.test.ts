@@ -47,19 +47,45 @@ describe('GitHubClientImpl', () => {
   });
 
   describe('getTotalContributions', () => {
+    const createTotalContributionsResponse = (
+      commits: Array<{ totalCount: number; isPrivate: boolean }> = [],
+      issues: Array<{ totalCount: number; isPrivate: boolean }> = [],
+      prs: Array<{ totalCount: number; isPrivate: boolean }> = [],
+      reviews: Array<{ totalCount: number; isPrivate: boolean }> = [],
+    ) => ({
+      user: {
+        contributionsCollection: {
+          commitContributionsByRepository: commits.map((c) => ({
+            contributions: { totalCount: c.totalCount },
+            repository: { isPrivate: c.isPrivate },
+          })),
+          issueContributionsByRepository: issues.map((c) => ({
+            contributions: { totalCount: c.totalCount },
+            repository: { isPrivate: c.isPrivate },
+          })),
+          pullRequestContributionsByRepository: prs.map((c) => ({
+            contributions: { totalCount: c.totalCount },
+            repository: { isPrivate: c.isPrivate },
+          })),
+          pullRequestReviewContributionsByRepository: reviews.map((c) => ({
+            contributions: { totalCount: c.totalCount },
+            repository: { isPrivate: c.isPrivate },
+          })),
+        },
+      },
+    });
+
     it('should return 4 contributions mapped correctly', async () => {
       const { githubClient, mockRequest } = setup();
 
-      mockRequest.mockResolvedValue({
-        user: {
-          contributionsCollection: {
-            totalCommitContributions: 100,
-            totalIssueContributions: 20,
-            totalPullRequestContributions: 30,
-            totalPullRequestReviewContributions: 15,
-          },
-        },
-      });
+      mockRequest.mockResolvedValue(
+        createTotalContributionsResponse(
+          [{ totalCount: 100, isPrivate: false }],
+          [{ totalCount: 20, isPrivate: false }],
+          [{ totalCount: 30, isPrivate: false }],
+          [{ totalCount: 15, isPrivate: false }],
+        ),
+      );
 
       const result = await githubClient.getTotalContributions(
         'testuser',
@@ -78,19 +104,47 @@ describe('GitHubClientImpl', () => {
       expect(result[3].type).toBe(CONTRIBUTION_TYPES.REVIEW);
     });
 
+    it('should exclude private repository contributions', async () => {
+      const { githubClient, mockRequest } = setup();
+
+      mockRequest.mockResolvedValue(
+        createTotalContributionsResponse(
+          [
+            { totalCount: 80, isPrivate: false },
+            { totalCount: 20, isPrivate: true },
+          ],
+          [
+            { totalCount: 10, isPrivate: false },
+            { totalCount: 10, isPrivate: true },
+          ],
+          [
+            { totalCount: 25, isPrivate: false },
+            { totalCount: 5, isPrivate: true },
+          ],
+          [
+            { totalCount: 12, isPrivate: false },
+            { totalCount: 3, isPrivate: true },
+          ],
+        ),
+      );
+
+      const result = await githubClient.getTotalContributions(
+        'testuser',
+        '2025-01-01',
+        '2025-12-31',
+      );
+
+      expect(result).toHaveLength(4);
+      expect(result[0].totalCount).toBe(80);
+      expect(result[1].totalCount).toBe(10);
+      expect(result[2].totalCount).toBe(25);
+      expect(result[3].totalCount).toBe(12);
+    });
+
     it('should return 4 contributions with zero counts', async () => {
       const { githubClient, mockRequest } = setup();
 
-      mockRequest.mockResolvedValue({
-        user: {
-          contributionsCollection: {
-            totalCommitContributions: 0,
-            totalIssueContributions: 0,
-            totalPullRequestContributions: 0,
-            totalPullRequestReviewContributions: 0,
-          },
-        },
-      });
+      mockRequest.mockResolvedValue(createTotalContributionsResponse());
 
       const result = await githubClient.getTotalContributions(
         'testuser',
@@ -120,9 +174,11 @@ describe('GitHubClientImpl', () => {
       nameWithOwner: string,
       commitCount: number,
       languages: Array<{ name: string; color: string; size: number }>,
+      isPrivate = false,
     ) => ({
       contributions: { totalCount: commitCount },
       repository: {
+        isPrivate,
         nameWithOwner,
         languages: {
           edges: languages.map((lang) => ({
@@ -256,6 +312,34 @@ describe('GitHubClientImpl', () => {
       );
 
       expect(result).toEqual([]);
+    });
+
+    it('should exclude private repository contributions', async () => {
+      const { githubClient, mockRequest } = setup();
+
+      mockRequest.mockResolvedValue(
+        createResponse([
+          createRepoContribution('user/public-repo', 10, [
+            { name: 'TypeScript', color: '#3178c6', size: 5000 },
+          ]),
+          createRepoContribution(
+            'user/private-repo',
+            20,
+            [{ name: 'Python', color: '#3572A5', size: 3000 }],
+            true,
+          ),
+        ]),
+      );
+
+      const result = await githubClient.getLanguageContributions(
+        'testuser',
+        '2025-01-01',
+        '2025-12-31',
+      );
+
+      expect(result).toHaveLength(1);
+      expect(result[0].name).toBe('TypeScript');
+      expect(result[0].size).toBe(10.0);
     });
 
     it('should skip repository with zero commits', async () => {

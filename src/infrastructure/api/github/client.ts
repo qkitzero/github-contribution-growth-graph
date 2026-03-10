@@ -11,22 +11,55 @@ const TOTAL_CONTRIBUTIONS_QUERY = gql`
   query ($userName: String!, $from: DateTime!, $to: DateTime!) {
     user(login: $userName) {
       contributionsCollection(from: $from, to: $to) {
-        totalCommitContributions
-        totalIssueContributions
-        totalPullRequestContributions
-        totalPullRequestReviewContributions
+        commitContributionsByRepository(maxRepositories: 100) {
+          contributions {
+            totalCount
+          }
+          repository {
+            isPrivate
+          }
+        }
+        issueContributionsByRepository(maxRepositories: 100) {
+          contributions {
+            totalCount
+          }
+          repository {
+            isPrivate
+          }
+        }
+        pullRequestContributionsByRepository(maxRepositories: 100) {
+          contributions {
+            totalCount
+          }
+          repository {
+            isPrivate
+          }
+        }
+        pullRequestReviewContributionsByRepository(maxRepositories: 100) {
+          contributions {
+            totalCount
+          }
+          repository {
+            isPrivate
+          }
+        }
       }
     }
   }
 `;
 
+type ContributionByRepository = {
+  contributions: { totalCount: number };
+  repository: { isPrivate: boolean };
+};
+
 type TotalContributionsResponse = {
   user: {
     contributionsCollection: {
-      totalCommitContributions: number;
-      totalIssueContributions: number;
-      totalPullRequestContributions: number;
-      totalPullRequestReviewContributions: number;
+      commitContributionsByRepository: ContributionByRepository[];
+      issueContributionsByRepository: ContributionByRepository[];
+      pullRequestContributionsByRepository: ContributionByRepository[];
+      pullRequestReviewContributionsByRepository: ContributionByRepository[];
     };
   };
 };
@@ -40,6 +73,7 @@ const LANGUAGE_CONTRIBUTIONS_QUERY = gql`
             totalCount
           }
           repository {
+            isPrivate
             nameWithOwner
             languages(first: 10, orderBy: { field: SIZE, direction: DESC }) {
               edges {
@@ -68,6 +102,7 @@ type LanguageEdge = {
 };
 
 type Repository = {
+  isPrivate: boolean;
   nameWithOwner: string;
   languages: {
     edges: LanguageEdge[];
@@ -107,11 +142,16 @@ export class GitHubClientImpl implements GitHubClient {
     });
     const collection = res.user.contributionsCollection;
 
+    const sumPublic = (entries: ContributionByRepository[]) =>
+      entries
+        .filter((e) => !e.repository.isPrivate)
+        .reduce((sum, e) => sum + e.contributions.totalCount, 0);
+
     const contributionMapping: Array<{ count: number; type: ContributionType }> = [
-      { count: collection.totalCommitContributions, type: CONTRIBUTION_TYPES.COMMIT },
-      { count: collection.totalIssueContributions, type: CONTRIBUTION_TYPES.ISSUE },
-      { count: collection.totalPullRequestContributions, type: CONTRIBUTION_TYPES.PR },
-      { count: collection.totalPullRequestReviewContributions, type: CONTRIBUTION_TYPES.REVIEW },
+      { count: sumPublic(collection.commitContributionsByRepository), type: CONTRIBUTION_TYPES.COMMIT },
+      { count: sumPublic(collection.issueContributionsByRepository), type: CONTRIBUTION_TYPES.ISSUE },
+      { count: sumPublic(collection.pullRequestContributionsByRepository), type: CONTRIBUTION_TYPES.PR },
+      { count: sumPublic(collection.pullRequestReviewContributionsByRepository), type: CONTRIBUTION_TYPES.REVIEW },
     ];
 
     return contributionMapping.map(
@@ -133,6 +173,7 @@ export class GitHubClientImpl implements GitHubClient {
     const languageMap = new Map<string, { color: string; size: number }>();
 
     for (const entry of commitContribs) {
+      if (entry.repository.isPrivate) continue;
       const commitCount = entry.contributions.totalCount;
       const edges = entry.repository.languages.edges;
       const totalBytes = edges.reduce((sum, edge) => sum + edge.size, 0);
