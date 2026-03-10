@@ -36,48 +36,9 @@ const LANGUAGE_CONTRIBUTIONS_QUERY = gql`
     user(login: $userName) {
       contributionsCollection(from: $from, to: $to) {
         commitContributionsByRepository(maxRepositories: 100) {
-          repository {
-            nameWithOwner
-            languages(first: 10, orderBy: { field: SIZE, direction: DESC }) {
-              edges {
-                size
-                node {
-                  name
-                  color
-                }
-              }
-            }
+          contributions {
+            totalCount
           }
-        }
-        pullRequestContributionsByRepository(maxRepositories: 100) {
-          repository {
-            nameWithOwner
-            languages(first: 10, orderBy: { field: SIZE, direction: DESC }) {
-              edges {
-                size
-                node {
-                  name
-                  color
-                }
-              }
-            }
-          }
-        }
-        issueContributionsByRepository(maxRepositories: 100) {
-          repository {
-            nameWithOwner
-            languages(first: 10, orderBy: { field: SIZE, direction: DESC }) {
-              edges {
-                size
-                node {
-                  name
-                  color
-                }
-              }
-            }
-          }
-        }
-        pullRequestReviewContributionsByRepository(maxRepositories: 100) {
           repository {
             nameWithOwner
             languages(first: 10, orderBy: { field: SIZE, direction: DESC }) {
@@ -114,6 +75,7 @@ type Repository = {
 };
 
 type ContributionsByRepository = {
+  contributions: { totalCount: number };
   repository: Repository;
 }[];
 
@@ -121,9 +83,6 @@ type LanguageContributionsResponse = {
   user: {
     contributionsCollection: {
       commitContributionsByRepository: ContributionsByRepository;
-      pullRequestContributionsByRepository: ContributionsByRepository;
-      issueContributionsByRepository: ContributionsByRepository;
-      pullRequestReviewContributionsByRepository: ContributionsByRepository;
     };
   };
 };
@@ -169,43 +128,32 @@ export class GitHubClientImpl implements GitHubClient {
         to,
       },
     );
-    const collection = res.user.contributionsCollection;
-
-    const repositoryLanguages = new Map<string, LanguageEdge[]>();
-
-    const processRepos = (contributionsByRepo: ContributionsByRepository) => {
-      contributionsByRepo.forEach(({ repository }) => {
-        if (!repositoryLanguages.has(repository.nameWithOwner)) {
-          repositoryLanguages.set(repository.nameWithOwner, repository.languages.edges);
-        }
-      });
-    };
-
-    [
-      collection.commitContributionsByRepository,
-      collection.pullRequestContributionsByRepository,
-      collection.issueContributionsByRepository,
-      collection.pullRequestReviewContributionsByRepository,
-    ].forEach(processRepos);
+    const commitContribs = res.user.contributionsCollection.commitContributionsByRepository;
 
     const languageMap = new Map<string, { color: string; size: number }>();
 
-    repositoryLanguages.forEach((edges) => {
-      edges.forEach((edge) => {
+    for (const entry of commitContribs) {
+      const commitCount = entry.contributions.totalCount;
+      const edges = entry.repository.languages.edges;
+      const totalBytes = edges.reduce((sum, edge) => sum + edge.size, 0);
+      if (totalBytes === 0 || commitCount === 0) continue;
+
+      for (const edge of edges) {
         const { name, color } = edge.node;
-        const { size } = edge;
+        const proportion = edge.size / totalBytes;
+        const weightedScore = commitCount * proportion;
 
         if (languageMap.has(name)) {
           const current = languageMap.get(name)!;
           languageMap.set(name, {
             color: current.color,
-            size: current.size + size,
+            size: current.size + weightedScore,
           });
         } else {
-          languageMap.set(name, { color, size });
+          languageMap.set(name, { color, size: weightedScore });
         }
-      });
-    });
+      }
+    }
 
     const languages: Language[] = Array.from(languageMap.entries()).map(
       ([name, { color, size }]) => new Language(new Date(from), new Date(to), name, color, size),
