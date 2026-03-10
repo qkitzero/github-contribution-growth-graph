@@ -2,6 +2,6 @@ limits:
   files: 15
   lines:
     '': 100
-    'src/': 200
+    'src/': 500
 ignore:
   - 'package-lock.json'

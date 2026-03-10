@@ -47,19 +47,45 @@ describe('GitHubClientImpl', () => {
   });
 
   describe('getTotalContributions', () => {
+    const createTotalContributionsResponse = (
+      commits: Array<{ totalCount: number; isPrivate: boolean }> = [],
+      issues: Array<{ totalCount: number; isPrivate: boolean }> = [],
+      prs: Array<{ totalCount: number; isPrivate: boolean }> = [],
+      reviews: Array<{ totalCount: number; isPrivate: boolean }> = [],
+    ) => ({
+      user: {
+        contributionsCollection: {
+          commitContributionsByRepository: commits.map((c) => ({
+            contributions: { totalCount: c.totalCount },
+            repository: { isPrivate: c.isPrivate },
+          })),
+          issueContributionsByRepository: issues.map((c) => ({
+            contributions: { totalCount: c.totalCount },
+            repository: { isPrivate: c.isPrivate },
+          })),
+          pullRequestContributionsByRepository: prs.map((c) => ({
+            contributions: { totalCount: c.totalCount },
+            repository: { isPrivate: c.isPrivate },
+          })),
+          pullRequestReviewContributionsByRepository: reviews.map((c) => ({
+            contributions: { totalCount: c.totalCount },
+            repository: { isPrivate: c.isPrivate },
+          })),
+        },
+      },
+    });
+
     it('should return 4 contributions mapped correctly', async () => {
       const { githubClient, mockRequest } = setup();
 
-      mockRequest.mockResolvedValue({
-        user: {
-          contributionsCollection: {
-            totalCommitContributions: 100,
-            totalIssueContributions: 20,
-            totalPullRequestContributions: 30,
-            totalPullRequestReviewContributions: 15,
-          },
-        },
-      });
+      mockRequest.mockResolvedValue(
+        createTotalContributionsResponse(
+          [{ totalCount: 100, isPrivate: false }],
+          [{ totalCount: 20, isPrivate: false }],
+          [{ totalCount: 30, isPrivate: false }],
+          [{ totalCount: 15, isPrivate: false }],
+        ),
+      );
 
       const result = await githubClient.getTotalContributions(
         'testuser',
@@ -78,19 +104,47 @@ describe('GitHubClientImpl', () => {
       expect(result[3].type).toBe(CONTRIBUTION_TYPES.REVIEW);
     });
 
+    it('should exclude private repository contributions', async () => {
+      const { githubClient, mockRequest } = setup();
+
+      mockRequest.mockResolvedValue(
+        createTotalContributionsResponse(
+          [
+            { totalCount: 80, isPrivate: false },
+            { totalCount: 20, isPrivate: true },
+          ],
+          [
+            { totalCount: 10, isPrivate: false },
+            { totalCount: 10, isPrivate: true },
+          ],
+          [
+            { totalCount: 25, isPrivate: false },
+            { totalCount: 5, isPrivate: true },
+          ],
+          [
+            { totalCount: 12, isPrivate: false },
+            { totalCount: 3, isPrivate: true },
+          ],
+        ),
+      );
+
+      const result = await githubClient.getTotalContributions(
+        'testuser',
+        '2025-01-01',
+        '2025-12-31',
+      );
+
+      expect(result).toHaveLength(4);
+      expect(result[0].totalCount).toBe(80);
+      expect(result[1].totalCount).toBe(10);
+      expect(result[2].totalCount).toBe(25);
+      expect(result[3].totalCount).toBe(12);
+    });
+
     it('should return 4 contributions with zero counts', async () => {
       const { githubClient, mockRequest } = setup();
 
-      mockRequest.mockResolvedValue({
-        user: {
-          contributionsCollection: {
-            totalCommitContributions: 0,
-            totalIssueContributions: 0,
-            totalPullRequestContributions: 0,
-            totalPullRequestReviewContributions: 0,
-          },
-        },
-      });
+      mockRequest.mockResolvedValue(createTotalContributionsResponse());
 
       const result = await githubClient.getTotalContributions(
         'testuser',
@@ -118,9 +172,13 @@ describe('GitHubClientImpl', () => {
   describe('getLanguageContributions', () => {
     const createRepoContribution = (
       nameWithOwner: string,
+      commitCount: number,
       languages: Array<{ name: string; color: string; size: number }>,
+      isPrivate = false,
     ) => ({
+      contributions: { totalCount: commitCount },
       repository: {
+        isPrivate,
         nameWithOwner,
         languages: {
           edges: languages.map((lang) => ({
@@ -132,34 +190,24 @@ describe('GitHubClientImpl', () => {
     });
 
     const createResponse = (
-      overrides: Partial<{
-        commit: ReturnType<typeof createRepoContribution>[];
-        pr: ReturnType<typeof createRepoContribution>[];
-        issue: ReturnType<typeof createRepoContribution>[];
-        review: ReturnType<typeof createRepoContribution>[];
-      }> = {},
+      commitContribs: ReturnType<typeof createRepoContribution>[] = [],
     ) => ({
       user: {
         contributionsCollection: {
-          commitContributionsByRepository: overrides.commit ?? [],
-          pullRequestContributionsByRepository: overrides.pr ?? [],
-          issueContributionsByRepository: overrides.issue ?? [],
-          pullRequestReviewContributionsByRepository: overrides.review ?? [],
+          commitContributionsByRepository: commitContribs,
         },
       },
     });
 
-    it('should return languages for a single repository with a single language', async () => {
+    it('should return weighted score for a single repository with a single language', async () => {
       const { githubClient, mockRequest } = setup();
 
       mockRequest.mockResolvedValue(
-        createResponse({
-          commit: [
-            createRepoContribution('user/repo', [
-              { name: 'TypeScript', color: '#3178c6', size: 5000 },
-            ]),
-          ],
-        }),
+        createResponse([
+          createRepoContribution('user/repo', 10, [
+            { name: 'TypeScript', color: '#3178c6', size: 5000 },
+          ]),
+        ]),
       );
 
       const result = await githubClient.getLanguageContributions(
@@ -171,42 +219,19 @@ describe('GitHubClientImpl', () => {
       expect(result).toHaveLength(1);
       expect(result[0].name).toBe('TypeScript');
       expect(result[0].color).toBe('#3178c6');
-      expect(result[0].size).toBe(5000);
+      expect(result[0].size).toBe(10.0);
     });
 
-    it('should deduplicate repositories across contribution types', async () => {
-      const { githubClient, mockRequest } = setup();
-
-      const repo = createRepoContribution('user/repo', [
-        { name: 'TypeScript', color: '#3178c6', size: 5000 },
-      ]);
-
-      mockRequest.mockResolvedValue(createResponse({ commit: [repo], pr: [repo], issue: [repo] }));
-
-      const result = await githubClient.getLanguageContributions(
-        'testuser',
-        '2025-01-01',
-        '2025-12-31',
-      );
-
-      expect(result).toHaveLength(1);
-      expect(result[0].size).toBe(5000);
-    });
-
-    it('should aggregate sizes for the same language across repositories', async () => {
+    it('should distribute commits proportionally across multiple languages', async () => {
       const { githubClient, mockRequest } = setup();
 
       mockRequest.mockResolvedValue(
-        createResponse({
-          commit: [
-            createRepoContribution('user/repo1', [
-              { name: 'TypeScript', color: '#3178c6', size: 3000 },
-            ]),
-            createRepoContribution('user/repo2', [
-              { name: 'TypeScript', color: '#3178c6', size: 2000 },
-            ]),
-          ],
-        }),
+        createResponse([
+          createRepoContribution('user/repo', 10, [
+            { name: 'TypeScript', color: '#3178c6', size: 7500 },
+            { name: 'JavaScript', color: '#f1e05a', size: 2500 },
+          ]),
+        ]),
       );
 
       const result = await githubClient.getLanguageContributions(
@@ -215,27 +240,29 @@ describe('GitHubClientImpl', () => {
         '2025-12-31',
       );
 
-      expect(result).toHaveLength(1);
-      expect(result[0].name).toBe('TypeScript');
-      expect(result[0].size).toBe(5000);
+      expect(result).toHaveLength(2);
+
+      const ts = result.find((l) => l.name === 'TypeScript');
+      const js = result.find((l) => l.name === 'JavaScript');
+
+      expect(ts?.size).toBe(7.5);
+      expect(js?.size).toBe(2.5);
     });
 
-    it('should handle multiple repositories with multiple languages', async () => {
+    it('should aggregate weighted scores across multiple repositories', async () => {
       const { githubClient, mockRequest } = setup();
 
       mockRequest.mockResolvedValue(
-        createResponse({
-          commit: [
-            createRepoContribution('user/repo1', [
-              { name: 'TypeScript', color: '#3178c6', size: 3000 },
-              { name: 'JavaScript', color: '#f1e05a', size: 1000 },
-            ]),
-            createRepoContribution('user/repo2', [
-              { name: 'TypeScript', color: '#3178c6', size: 2000 },
-              { name: 'Python', color: '#3572A5', size: 4000 },
-            ]),
-          ],
-        }),
+        createResponse([
+          createRepoContribution('user/repo1', 10, [
+            { name: 'TypeScript', color: '#3178c6', size: 7500 },
+            { name: 'JavaScript', color: '#f1e05a', size: 2500 },
+          ]),
+          createRepoContribution('user/repo2', 20, [
+            { name: 'TypeScript', color: '#3178c6', size: 6000 },
+            { name: 'Python', color: '#3572A5', size: 4000 },
+          ]),
+        ]),
       );
 
       const result = await githubClient.getLanguageContributions(
@@ -250,9 +277,9 @@ describe('GitHubClientImpl', () => {
       const js = result.find((l) => l.name === 'JavaScript');
       const py = result.find((l) => l.name === 'Python');
 
-      expect(ts?.size).toBe(5000);
-      expect(js?.size).toBe(1000);
-      expect(py?.size).toBe(4000);
+      expect(ts?.size).toBe(19.5);
+      expect(js?.size).toBe(2.5);
+      expect(py?.size).toBe(8.0);
     });
 
     it('should return empty array when no repositories exist', async () => {
@@ -269,13 +296,61 @@ describe('GitHubClientImpl', () => {
       expect(result).toEqual([]);
     });
 
-    it('should return empty array when repository has no language edges', async () => {
+    it('should skip repository with no language edges', async () => {
       const { githubClient, mockRequest } = setup();
 
       mockRequest.mockResolvedValue(
-        createResponse({
-          commit: [createRepoContribution('user/repo', [])],
-        }),
+        createResponse([
+          createRepoContribution('user/repo', 10, []),
+        ]),
+      );
+
+      const result = await githubClient.getLanguageContributions(
+        'testuser',
+        '2025-01-01',
+        '2025-12-31',
+      );
+
+      expect(result).toEqual([]);
+    });
+
+    it('should exclude private repository contributions', async () => {
+      const { githubClient, mockRequest } = setup();
+
+      mockRequest.mockResolvedValue(
+        createResponse([
+          createRepoContribution('user/public-repo', 10, [
+            { name: 'TypeScript', color: '#3178c6', size: 5000 },
+          ]),
+          createRepoContribution(
+            'user/private-repo',
+            20,
+            [{ name: 'Python', color: '#3572A5', size: 3000 }],
+            true,
+          ),
+        ]),
+      );
+
+      const result = await githubClient.getLanguageContributions(
+        'testuser',
+        '2025-01-01',
+        '2025-12-31',
+      );
+
+      expect(result).toHaveLength(1);
+      expect(result[0].name).toBe('TypeScript');
+      expect(result[0].size).toBe(10.0);
+    });
+
+    it('should skip repository with zero commits', async () => {
+      const { githubClient, mockRequest } = setup();
+
+      mockRequest.mockResolvedValue(
+        createResponse([
+          createRepoContribution('user/repo', 0, [
+            { name: 'TypeScript', color: '#3178c6', size: 5000 },
+          ]),
+        ]),
       );
 
       const result = await githubClient.getLanguageContributions(

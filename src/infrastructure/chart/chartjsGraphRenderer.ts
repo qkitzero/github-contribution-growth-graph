@@ -83,7 +83,7 @@ export class ChartjsGraphRenderer implements GraphRenderer {
       periods,
       datasets,
       'GitHub Language Growth Graph',
-      'Cumulative Code Size (bytes)',
+      'Cumulative Language Activity (weighted commits)',
     );
 
     return await canvas.renderToBuffer(chartConfiguration);
