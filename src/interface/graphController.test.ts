@@ -1,4 +1,5 @@
 import { Request, Response } from 'express';
+import { ValidationError } from '../application/errors';
 import { GraphUseCase } from '../application/graphUseCase';
 import { GraphController } from './graphController';
 
@@ -50,6 +51,27 @@ describe('GraphController', () => {
       expect(res.status).toHaveBeenCalledWith(200);
       expect(res.send).toHaveBeenCalledWith(mockGraphBuffer);
     });
+
+    it('should throw ValidationError when user is not provided', async () => {
+      const { graphController } = setup();
+
+      const req = {
+        query: {},
+      } as unknown as Request;
+
+      const res = {
+        setHeader: jest.fn().mockReturnThis(),
+        status: jest.fn().mockReturnThis(),
+        send: jest.fn(),
+      } as unknown as Response;
+
+      await expect(graphController.getContributionsGraph(req, res)).rejects.toThrow(
+        ValidationError,
+      );
+      await expect(graphController.getContributionsGraph(req, res)).rejects.toThrow(
+        'Missing required query parameter: user',
+      );
+    });
   });
 
   describe('getLanguagesGraph', () => {
@@ -85,6 +107,25 @@ describe('GraphController', () => {
       expect(res.setHeader).toHaveBeenCalledWith('Content-Type', 'image/png');
       expect(res.status).toHaveBeenCalledWith(200);
       expect(res.send).toHaveBeenCalledWith(mockGraphBuffer);
+    });
+
+    it('should throw ValidationError when user is not provided', async () => {
+      const { graphController } = setup();
+
+      const req = {
+        query: {},
+      } as unknown as Request;
+
+      const res = {
+        setHeader: jest.fn().mockReturnThis(),
+        status: jest.fn().mockReturnThis(),
+        send: jest.fn(),
+      } as unknown as Response;
+
+      await expect(graphController.getLanguagesGraph(req, res)).rejects.toThrow(ValidationError);
+      await expect(graphController.getLanguagesGraph(req, res)).rejects.toThrow(
+        'Missing required query parameter: user',
+      );
     });
   });
 });

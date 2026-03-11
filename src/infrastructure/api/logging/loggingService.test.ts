@@ -1,19 +1,21 @@
-import { LoggingError, LoggingServiceImpl } from './loggingService';
+import createClient from 'openapi-fetch';
+import { LoggingError } from '../../../application/errors';
+import { LoggingServiceImpl } from './loggingService';
+import { paths } from './schema';
 
 describe('LoggingServiceImpl', () => {
   const setup = () => {
-    const mockClient = {
-      POST: jest.fn(),
-    } as any;
+    const mockPOST = jest.fn();
+    const mockClient = { POST: mockPOST } as unknown as ReturnType<typeof createClient<paths>>;
     const loggingService = new LoggingServiceImpl(mockClient);
-    return { mockClient, loggingService };
+    return { mockPOST, loggingService };
   };
 
   describe('createLog', () => {
     it('should return log id on success', async () => {
-      const { mockClient, loggingService } = setup();
+      const { mockPOST, loggingService } = setup();
 
-      mockClient.POST.mockResolvedValue({
+      mockPOST.mockResolvedValue({
         data: { id: 'log-123' },
         error: undefined,
       });
@@ -26,7 +28,7 @@ describe('LoggingServiceImpl', () => {
       );
 
       expect(result).toBe('log-123');
-      expect(mockClient.POST).toHaveBeenCalledWith('/v1/logs', {
+      expect(mockPOST).toHaveBeenCalledWith('/v1/logs', {
         headers: { Authorization: 'Bearer bearer-token' },
         body: {
           serviceName: 'my-service',
@@ -37,9 +39,9 @@ describe('LoggingServiceImpl', () => {
     });
 
     it('should throw LoggingError when API returns error with message', async () => {
-      const { mockClient, loggingService } = setup();
+      const { mockPOST, loggingService } = setup();
 
-      mockClient.POST.mockResolvedValue({
+      mockPOST.mockResolvedValue({
         data: undefined,
         error: { message: 'Unauthorized' },
       });
@@ -53,9 +55,9 @@ describe('LoggingServiceImpl', () => {
     });
 
     it('should throw LoggingError with fallback message when API returns error without message', async () => {
-      const { mockClient, loggingService } = setup();
+      const { mockPOST, loggingService } = setup();
 
-      mockClient.POST.mockResolvedValue({
+      mockPOST.mockResolvedValue({
         data: undefined,
         error: { message: '' },
       });

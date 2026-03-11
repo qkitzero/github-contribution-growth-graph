@@ -1,3 +1,4 @@
+import { GitHubError } from '../../../application/errors';
 import { CONTRIBUTION_TYPES } from '../../../domain/contribution/contribution';
 
 jest.mock('graphql-request', () => ({
@@ -13,9 +14,10 @@ import { GitHubClientImpl } from './client';
 describe('GitHubClientImpl', () => {
   const setup = () => {
     const githubClient = new GitHubClientImpl('test-token');
-    const mockRequest = (GraphQLClient as jest.Mock).mock.results[
+    const mockInstance = (GraphQLClient as jest.Mock).mock.results[
       (GraphQLClient as jest.Mock).mock.results.length - 1
-    ].value.request as jest.Mock;
+    ].value as { request: jest.Mock };
+    const mockRequest = mockInstance.request;
     return { githubClient, mockRequest };
   };
 
@@ -158,11 +160,14 @@ describe('GitHubClientImpl', () => {
       });
     });
 
-    it('should propagate GraphQL errors', async () => {
+    it('should propagate GraphQL errors as GitHubError', async () => {
       const { githubClient, mockRequest } = setup();
 
       mockRequest.mockRejectedValue(new Error('GraphQL error'));
 
+      await expect(
+        githubClient.getTotalContributions('testuser', '2025-01-01', '2025-12-31'),
+      ).rejects.toThrow(GitHubError);
       await expect(
         githubClient.getTotalContributions('testuser', '2025-01-01', '2025-12-31'),
       ).rejects.toThrow('GraphQL error');
@@ -189,9 +194,7 @@ describe('GitHubClientImpl', () => {
       },
     });
 
-    const createResponse = (
-      commitContribs: ReturnType<typeof createRepoContribution>[] = [],
-    ) => ({
+    const createResponse = (commitContribs: ReturnType<typeof createRepoContribution>[] = []) => ({
       user: {
         contributionsCollection: {
           commitContributionsByRepository: commitContribs,
@@ -299,11 +302,7 @@ describe('GitHubClientImpl', () => {
     it('should skip repository with no language edges', async () => {
       const { githubClient, mockRequest } = setup();
 
-      mockRequest.mockResolvedValue(
-        createResponse([
-          createRepoContribution('user/repo', 10, []),
-        ]),
-      );
+      mockRequest.mockResolvedValue(createResponse([createRepoContribution('user/repo', 10, [])]));
 
       const result = await githubClient.getLanguageContributions(
         'testuser',
@@ -362,11 +361,14 @@ describe('GitHubClientImpl', () => {
       expect(result).toEqual([]);
     });
 
-    it('should propagate GraphQL errors', async () => {
+    it('should propagate GraphQL errors as GitHubError', async () => {
       const { githubClient, mockRequest } = setup();
 
       mockRequest.mockRejectedValue(new Error('GraphQL error'));
 
+      await expect(
+        githubClient.getLanguageContributions('testuser', '2025-01-01', '2025-12-31'),
+      ).rejects.toThrow(GitHubError);
       await expect(
         githubClient.getLanguageContributions('testuser', '2025-01-01', '2025-12-31'),
       ).rejects.toThrow('GraphQL error');

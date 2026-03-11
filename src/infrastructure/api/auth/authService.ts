@@ -1,13 +1,7 @@
 import createClient from 'openapi-fetch';
 import { AuthService } from '../../../application/authService';
+import { AuthError } from '../../../application/errors';
 import { paths } from './schema';
-
-export class AuthError extends Error {
-  constructor(message: string) {
-    super(message);
-    this.name = 'AuthError';
-  }
-}
 
 export class AuthServiceImpl implements AuthService {
   constructor(
