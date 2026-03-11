@@ -1,4 +1,5 @@
 import { gql, GraphQLClient } from 'graphql-request';
+import { GitHubError } from '../../../application/errors';
 import { GitHubClient } from '../../../application/githubClient';
 import {
   Contribution,
@@ -135,11 +136,18 @@ export class GitHubClientImpl implements GitHubClient {
   }
 
   async getTotalContributions(userName: string, from: string, to: string): Promise<Contribution[]> {
-    const res = await this.client.request<TotalContributionsResponse>(TOTAL_CONTRIBUTIONS_QUERY, {
-      userName,
-      from,
-      to,
-    });
+    let res: TotalContributionsResponse;
+    try {
+      res = await this.client.request<TotalContributionsResponse>(TOTAL_CONTRIBUTIONS_QUERY, {
+        userName,
+        from,
+        to,
+      });
+    } catch (error) {
+      throw new GitHubError(
+        error instanceof Error ? error.message : 'Failed to fetch contributions',
+      );
+    }
     const collection = res.user.contributionsCollection;
 
     const sumPublic = (entries: ContributionByRepository[]) =>
@@ -172,14 +180,18 @@ export class GitHubClientImpl implements GitHubClient {
   }
 
   async getLanguageContributions(userName: string, from: string, to: string): Promise<Language[]> {
-    const res = await this.client.request<LanguageContributionsResponse>(
-      LANGUAGE_CONTRIBUTIONS_QUERY,
-      {
+    let res: LanguageContributionsResponse;
+    try {
+      res = await this.client.request<LanguageContributionsResponse>(LANGUAGE_CONTRIBUTIONS_QUERY, {
         userName,
         from,
         to,
-      },
-    );
+      });
+    } catch (error) {
+      throw new GitHubError(
+        error instanceof Error ? error.message : 'Failed to fetch contributions',
+      );
+    }
     const commitContribs = res.user.contributionsCollection.commitContributionsByRepository;
 
     const languageMap = new Map<string, { color: string; size: number }>();

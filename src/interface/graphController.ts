@@ -1,4 +1,5 @@
 import { Request, Response } from 'express';
+import { ValidationError } from '../application/errors';
 import { GraphUseCase } from '../application/graphUseCase';
 
 export class GraphController {
@@ -13,6 +14,8 @@ export class GraphController {
       size?: string;
       types?: string;
     };
+
+    if (!user) throw new ValidationError('Missing required query parameter: user');
 
     const image = await this.graphUseCase.createContributionsGraph(
       user,
@@ -34,6 +37,8 @@ export class GraphController {
       to?: string;
       size?: string;
     };
+
+    if (!user) throw new ValidationError('Missing required query parameter: user');
 
     const image = await this.graphUseCase.createLanguagesGraph(user, from, to, size);
 

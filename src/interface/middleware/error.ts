@@ -1,26 +1,37 @@
 import { NextFunction, Request, Response } from 'express';
-import { AuthError } from '../../infrastructure/api/auth/authService';
-import { LoggingError } from '../../infrastructure/api/logging/loggingService';
+import {
+  ApplicationError,
+  AuthError,
+  GitHubError,
+  LoggingError,
+  ValidationError,
+} from '../../application/errors';
 
 export class ErrorMiddleware {
-  static handle = (err: Error, _req: Request, res: Response, _next: NextFunction) => {
-    console.error(err.stack);
-    const statusCode = ErrorMiddleware.getStatusCode(err);
-    res.status(statusCode).json({
-      error: ErrorMiddleware.getErrorName(err),
-      message: err.message,
-    });
+  private static readonly STATUS_MAP: ReadonlyArray<[new (...args: never[]) => Error, number]> = [
+    [ValidationError, 400],
+    [AuthError, 502],
+    [LoggingError, 502],
+    [GitHubError, 502],
+  ];
+
+  static notFoundHandler = (_req: Request, res: Response) => {
+    res
+      .status(404)
+      .json({ error: 'NotFoundError', message: 'The requested resource was not found' });
   };
 
-  private static getStatusCode(err: Error): number {
-    if (err instanceof AuthError) return 502;
-    if (err instanceof LoggingError) return 502;
-    return 500;
-  }
+  static errorHandler = (err: Error, _req: Request, res: Response, _next: NextFunction) => {
+    console.error(err.stack);
+    const statusCode = ErrorMiddleware.resolveStatusCode(err);
+    const errorName = err instanceof ApplicationError ? err.name : 'InternalServerError';
+    res.status(statusCode).json({ error: errorName, message: err.message });
+  };
 
-  private static getErrorName(err: Error): string {
-    if (err instanceof AuthError) return err.name;
-    if (err instanceof LoggingError) return err.name;
-    return 'InternalServerError';
+  private static resolveStatusCode(err: Error): number {
+    for (const [ErrorClass, code] of ErrorMiddleware.STATUS_MAP) {
+      if (err instanceof ErrorClass) return code;
+    }
+    return 500;
   }
 }

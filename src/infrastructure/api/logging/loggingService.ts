@@ -1,13 +1,7 @@
 import createClient from 'openapi-fetch';
+import { LoggingError } from '../../../application/errors';
 import { LoggingService } from '../../../application/loggingService';
 import { paths } from './schema';
-
-export class LoggingError extends Error {
-  constructor(message: string) {
-    super(message);
-    this.name = 'LoggingError';
-  }
-}
 
 export class LoggingServiceImpl implements LoggingService {
   constructor(private readonly client: ReturnType<typeof createClient<paths>>) {}

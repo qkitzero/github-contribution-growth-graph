@@ -1,5 +1,6 @@
 import createClient from 'openapi-fetch';
-import { LoggingError, LoggingServiceImpl } from './loggingService';
+import { LoggingError } from '../../../application/errors';
+import { LoggingServiceImpl } from './loggingService';
 import { paths } from './schema';
 
 describe('LoggingServiceImpl', () => {
