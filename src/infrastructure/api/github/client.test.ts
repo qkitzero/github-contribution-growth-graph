@@ -13,9 +13,10 @@ import { GitHubClientImpl } from './client';
 describe('GitHubClientImpl', () => {
   const setup = () => {
     const githubClient = new GitHubClientImpl('test-token');
-    const mockRequest = (GraphQLClient as jest.Mock).mock.results[
+    const mockInstance = (GraphQLClient as jest.Mock).mock.results[
       (GraphQLClient as jest.Mock).mock.results.length - 1
-    ].value.request as jest.Mock;
+    ].value as { request: jest.Mock };
+    const mockRequest = mockInstance.request;
     return { githubClient, mockRequest };
   };
 
@@ -189,9 +190,7 @@ describe('GitHubClientImpl', () => {
       },
     });
 
-    const createResponse = (
-      commitContribs: ReturnType<typeof createRepoContribution>[] = [],
-    ) => ({
+    const createResponse = (commitContribs: ReturnType<typeof createRepoContribution>[] = []) => ({
       user: {
         contributionsCollection: {
           commitContributionsByRepository: commitContribs,
@@ -299,11 +298,7 @@ describe('GitHubClientImpl', () => {
     it('should skip repository with no language edges', async () => {
       const { githubClient, mockRequest } = setup();
 
-      mockRequest.mockResolvedValue(
-        createResponse([
-          createRepoContribution('user/repo', 10, []),
-        ]),
-      );
+      mockRequest.mockResolvedValue(createResponse([createRepoContribution('user/repo', 10, [])]));
 
       const result = await githubClient.getLanguageContributions(
         'testuser',

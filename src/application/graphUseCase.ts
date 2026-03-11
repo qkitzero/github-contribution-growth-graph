@@ -42,7 +42,7 @@ export class GraphUseCaseImpl implements GraphUseCase {
   ): Promise<Buffer> {
     if (!GraphUseCaseImpl.LOGGING_EXCLUDE_USERS.includes(user)) {
       const token = await this.authService.getM2MToken();
-      this.loggingService.createLog(
+      void this.loggingService.createLog(
         token,
         'github-contribution-growth-graph',
         'INFO',
@@ -67,7 +67,7 @@ export class GraphUseCaseImpl implements GraphUseCase {
   ): Promise<Buffer> {
     if (!GraphUseCaseImpl.LOGGING_EXCLUDE_USERS.includes(user)) {
       const token = await this.authService.getM2MToken();
-      this.loggingService.createLog(
+      void this.loggingService.createLog(
         token,
         'github-contribution-growth-graph',
         'INFO',
