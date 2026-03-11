@@ -1,11 +1,11 @@
 import { gql, GraphQLClient } from 'graphql-request';
+import { GitHubClient } from '../../../application/githubClient';
 import {
   Contribution,
   CONTRIBUTION_TYPES,
   ContributionType,
 } from '../../../domain/contribution/contribution';
 import { Language } from '../../../domain/language/language';
-import { GitHubClient } from '../../../application/githubClient';
 
 const TOTAL_CONTRIBUTIONS_QUERY = gql`
   query ($userName: String!, $from: DateTime!, $to: DateTime!) {
@@ -148,10 +148,22 @@ export class GitHubClientImpl implements GitHubClient {
         .reduce((sum, e) => sum + e.contributions.totalCount, 0);
 
     const contributionMapping: Array<{ count: number; type: ContributionType }> = [
-      { count: sumPublic(collection.commitContributionsByRepository), type: CONTRIBUTION_TYPES.COMMIT },
-      { count: sumPublic(collection.issueContributionsByRepository), type: CONTRIBUTION_TYPES.ISSUE },
-      { count: sumPublic(collection.pullRequestContributionsByRepository), type: CONTRIBUTION_TYPES.PR },
-      { count: sumPublic(collection.pullRequestReviewContributionsByRepository), type: CONTRIBUTION_TYPES.REVIEW },
+      {
+        count: sumPublic(collection.commitContributionsByRepository),
+        type: CONTRIBUTION_TYPES.COMMIT,
+      },
+      {
+        count: sumPublic(collection.issueContributionsByRepository),
+        type: CONTRIBUTION_TYPES.ISSUE,
+      },
+      {
+        count: sumPublic(collection.pullRequestContributionsByRepository),
+        type: CONTRIBUTION_TYPES.PR,
+      },
+      {
+        count: sumPublic(collection.pullRequestReviewContributionsByRepository),
+        type: CONTRIBUTION_TYPES.REVIEW,
+      },
     ];
 
     return contributionMapping.map(

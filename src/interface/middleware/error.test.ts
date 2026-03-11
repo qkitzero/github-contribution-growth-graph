@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from 'express';
-import { ErrorMiddleware } from './error';
 import { AuthError } from '../../infrastructure/api/auth/authService';
 import { LoggingError } from '../../infrastructure/api/logging/loggingService';
+import { ErrorMiddleware } from './error';
 
 describe('ErrorMiddleware', () => {
   const setup = () => {

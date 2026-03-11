@@ -12,7 +12,12 @@ export class LoggingError extends Error {
 export class LoggingServiceImpl implements LoggingService {
   constructor(private readonly client: ReturnType<typeof createClient<paths>>) {}
 
-  async createLog(token: string, serviceName: string, level: string, message: string): Promise<string> {
+  async createLog(
+    token: string,
+    serviceName: string,
+    level: string,
+    message: string,
+  ): Promise<string> {
     const { data, error } = await this.client.POST('/v1/logs', {
       headers: { Authorization: `Bearer ${token}` },
       body: {
