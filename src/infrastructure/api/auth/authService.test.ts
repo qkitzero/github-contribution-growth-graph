@@ -1,5 +1,6 @@
 import createClient from 'openapi-fetch';
-import { AuthError, AuthServiceImpl } from './authService';
+import { AuthError } from '../../../application/errors';
+import { AuthServiceImpl } from './authService';
 import { paths } from './schema';
 
 describe('AuthServiceImpl', () => {

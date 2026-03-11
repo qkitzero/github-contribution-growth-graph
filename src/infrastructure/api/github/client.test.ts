@@ -1,3 +1,4 @@
+import { GitHubError } from '../../../application/errors';
 import { CONTRIBUTION_TYPES } from '../../../domain/contribution/contribution';
 
 jest.mock('graphql-request', () => ({
@@ -159,11 +160,14 @@ describe('GitHubClientImpl', () => {
       });
     });
 
-    it('should propagate GraphQL errors', async () => {
+    it('should propagate GraphQL errors as GitHubError', async () => {
       const { githubClient, mockRequest } = setup();
 
       mockRequest.mockRejectedValue(new Error('GraphQL error'));
 
+      await expect(
+        githubClient.getTotalContributions('testuser', '2025-01-01', '2025-12-31'),
+      ).rejects.toThrow(GitHubError);
       await expect(
         githubClient.getTotalContributions('testuser', '2025-01-01', '2025-12-31'),
       ).rejects.toThrow('GraphQL error');
@@ -357,11 +361,14 @@ describe('GitHubClientImpl', () => {
       expect(result).toEqual([]);
     });
 
-    it('should propagate GraphQL errors', async () => {
+    it('should propagate GraphQL errors as GitHubError', async () => {
       const { githubClient, mockRequest } = setup();
 
       mockRequest.mockRejectedValue(new Error('GraphQL error'));
 
+      await expect(
+        githubClient.getLanguageContributions('testuser', '2025-01-01', '2025-12-31'),
+      ).rejects.toThrow(GitHubError);
       await expect(
         githubClient.getLanguageContributions('testuser', '2025-01-01', '2025-12-31'),
       ).rejects.toThrow('GraphQL error');
