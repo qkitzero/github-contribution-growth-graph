@@ -8,8 +8,8 @@ Visualize your GitHub contribution journey and language usage over multiple year
 
 While GitHub's contribution graph shows daily activity, it's hard to see your cumulative growth over time. This service generates a dynamic growth graph that clearly displays your accumulated contributions and language statistics across years, perfect for showcasing your consistent effort on your profile.
 
-[![GitHub Contribution Growth Graph](https://github-contribution-growth-graph.qkitzero.xyz/graph/contributions?user=qkitzero)](https://github.com/qkitzero/github-contribution-growth-graph)
-[![GitHub Language Growth Graph](https://github-contribution-growth-graph.qkitzero.xyz/graph/languages?user=qkitzero)](https://github.com/qkitzero/github-contribution-growth-graph)
+[![GitHub Contribution Growth Graph](https://github-contribution-growth-graph.qkitzero.xyz/graph/contributions?user=qkitzero&v=2026-03-13)](https://github.com/qkitzero/github-contribution-growth-graph)
+[![GitHub Language Growth Graph](https://github-contribution-growth-graph.qkitzero.xyz/graph/languages?user=qkitzero&v=2026-03-13)](https://github.com/qkitzero/github-contribution-growth-graph)
 
 ## Usage
 
@@ -34,17 +34,17 @@ While GitHub's contribution graph shows daily activity, it's hard to see your cu
 
 Choose from various color themes to match your profile style:
 
-| Theme     | Preview                                                                                                                      |
-| --------- | ---------------------------------------------------------------------------------------------------------------------------- |
-| `default` | ![default](https://github-contribution-growth-graph.qkitzero.xyz/graph/contributions?user=qkitzero&theme=default&size=small) |
-| `blue`    | ![blue](https://github-contribution-growth-graph.qkitzero.xyz/graph/contributions?user=qkitzero&theme=blue&size=small)       |
-| `red`     | ![red](https://github-contribution-growth-graph.qkitzero.xyz/graph/contributions?user=qkitzero&theme=red&size=small)         |
-| `green`   | ![green](https://github-contribution-growth-graph.qkitzero.xyz/graph/contributions?user=qkitzero&theme=green&size=small)     |
-| `purple`  | ![purple](https://github-contribution-growth-graph.qkitzero.xyz/graph/contributions?user=qkitzero&theme=purple&size=small)   |
-| `orange`  | ![orange](https://github-contribution-growth-graph.qkitzero.xyz/graph/contributions?user=qkitzero&theme=orange&size=small)   |
-| `pink`    | ![pink](https://github-contribution-growth-graph.qkitzero.xyz/graph/contributions?user=qkitzero&theme=pink&size=small)       |
-| `dark`    | ![dark](https://github-contribution-growth-graph.qkitzero.xyz/graph/contributions?user=qkitzero&theme=dark&size=small)       |
-| `light`   | ![light](https://github-contribution-growth-graph.qkitzero.xyz/graph/contributions?user=qkitzero&theme=light&size=small)     |
+| Theme     | Preview                                                                                                                                   |
+| --------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| `default` | ![default](https://github-contribution-growth-graph.qkitzero.xyz/graph/contributions?user=qkitzero&theme=default&size=small&v=2026-03-13) |
+| `blue`    | ![blue](https://github-contribution-growth-graph.qkitzero.xyz/graph/contributions?user=qkitzero&theme=blue&size=small&v=2026-03-13)       |
+| `red`     | ![red](https://github-contribution-growth-graph.qkitzero.xyz/graph/contributions?user=qkitzero&theme=red&size=small&v=2026-03-13)         |
+| `green`   | ![green](https://github-contribution-growth-graph.qkitzero.xyz/graph/contributions?user=qkitzero&theme=green&size=small&v=2026-03-13)     |
+| `purple`  | ![purple](https://github-contribution-growth-graph.qkitzero.xyz/graph/contributions?user=qkitzero&theme=purple&size=small&v=2026-03-13)   |
+| `orange`  | ![orange](https://github-contribution-growth-graph.qkitzero.xyz/graph/contributions?user=qkitzero&theme=orange&size=small&v=2026-03-13)   |
+| `pink`    | ![pink](https://github-contribution-growth-graph.qkitzero.xyz/graph/contributions?user=qkitzero&theme=pink&size=small&v=2026-03-13)       |
+| `dark`    | ![dark](https://github-contribution-growth-graph.qkitzero.xyz/graph/contributions?user=qkitzero&theme=dark&size=small&v=2026-03-13)       |
+| `light`   | ![light](https://github-contribution-growth-graph.qkitzero.xyz/graph/contributions?user=qkitzero&theme=light&size=small&v=2026-03-13)     |
 
 ## Language Graph Query Parameters
 
@@ -54,3 +54,13 @@ Choose from various color themes to match your profile style:
 | `from`    | string | No       | Start date (YYYY-MM-DD)                 | 1 year ago |
 | `to`      | string | No       | End date (YYYY-MM-DD)                   | Today      |
 | `size`    | string | No       | Graph size (`small`, `medium`, `large`) | `medium`   |
+
+## Cache Busting
+
+Graph images are cached for 30 minutes. If you want to force a refresh, add an arbitrary query parameter like `&v=YYYY-MM-DD` to the URL:
+
+```markdown
+[![GitHub Contribution Growth Graph](https://github-contribution-growth-graph.qkitzero.xyz/graph/contributions?user=YOUR_USERNAME&v=YYYY-MM-DD)](https://github.com/qkitzero/github-contribution-growth-graph)
+```
+
+Since the URL differs, CDNs and browser caches treat it as a new resource, bypassing the cached version.
