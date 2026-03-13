@@ -3,6 +3,8 @@ import { ValidationError } from '../application/errors';
 import { GraphUseCase } from '../application/graphUseCase';
 
 export class GraphController {
+  private static readonly CACHE_CONTROL_HEADER = 'public, max-age=1800, s-maxage=1800';
+
   constructor(private readonly graphUseCase: GraphUseCase) {}
 
   getContributionsGraph = async (req: Request, res: Response) => {
@@ -27,6 +29,7 @@ export class GraphController {
     );
 
     res.setHeader('Content-Type', 'image/png');
+    res.setHeader('Cache-Control', GraphController.CACHE_CONTROL_HEADER);
     res.status(200).send(image);
   };
 
@@ -43,6 +46,7 @@ export class GraphController {
     const image = await this.graphUseCase.createLanguagesGraph(user, from, to, size);
 
     res.setHeader('Content-Type', 'image/png');
+    res.setHeader('Cache-Control', GraphController.CACHE_CONTROL_HEADER);
     res.status(200).send(image);
   };
 }

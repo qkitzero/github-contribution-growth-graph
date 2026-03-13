@@ -4,6 +4,8 @@ import { GraphUseCase } from '../application/graphUseCase';
 import { GraphController } from './graphController';
 
 describe('GraphController', () => {
+  const CACHE_CONTROL_HEADER_VALUE = 'public, max-age=1800, s-maxage=1800';
+
   const setup = () => {
     const mockGraphUseCase: jest.Mocked<GraphUseCase> = {
       createContributionsGraph: jest.fn(),
@@ -48,6 +50,7 @@ describe('GraphController', () => {
         'commit,issue,pr,review',
       );
       expect(res.setHeader).toHaveBeenCalledWith('Content-Type', 'image/png');
+      expect(res.setHeader).toHaveBeenCalledWith('Cache-Control', CACHE_CONTROL_HEADER_VALUE);
       expect(res.status).toHaveBeenCalledWith(200);
       expect(res.send).toHaveBeenCalledWith(mockGraphBuffer);
     });
@@ -105,6 +108,7 @@ describe('GraphController', () => {
         'medium',
       );
       expect(res.setHeader).toHaveBeenCalledWith('Content-Type', 'image/png');
+      expect(res.setHeader).toHaveBeenCalledWith('Cache-Control', CACHE_CONTROL_HEADER_VALUE);
       expect(res.status).toHaveBeenCalledWith(200);
       expect(res.send).toHaveBeenCalledWith(mockGraphBuffer);
     });
