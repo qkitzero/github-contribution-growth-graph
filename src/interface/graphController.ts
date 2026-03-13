@@ -27,6 +27,7 @@ export class GraphController {
     );
 
     res.setHeader('Content-Type', 'image/png');
+    res.setHeader('Cache-Control', 'public, max-age=1800, s-maxage=1800');
     res.status(200).send(image);
   };
 
@@ -43,6 +44,7 @@ export class GraphController {
     const image = await this.graphUseCase.createLanguagesGraph(user, from, to, size);
 
     res.setHeader('Content-Type', 'image/png');
+    res.setHeader('Cache-Control', 'public, max-age=1800, s-maxage=1800');
     res.status(200).send(image);
   };
 }

@@ -48,6 +48,10 @@ describe('GraphController', () => {
         'commit,issue,pr,review',
       );
       expect(res.setHeader).toHaveBeenCalledWith('Content-Type', 'image/png');
+      expect(res.setHeader).toHaveBeenCalledWith(
+        'Cache-Control',
+        'public, max-age=1800, s-maxage=1800',
+      );
       expect(res.status).toHaveBeenCalledWith(200);
       expect(res.send).toHaveBeenCalledWith(mockGraphBuffer);
     });
@@ -105,6 +109,10 @@ describe('GraphController', () => {
         'medium',
       );
       expect(res.setHeader).toHaveBeenCalledWith('Content-Type', 'image/png');
+      expect(res.setHeader).toHaveBeenCalledWith(
+        'Cache-Control',
+        'public, max-age=1800, s-maxage=1800',
+      );
       expect(res.status).toHaveBeenCalledWith(200);
       expect(res.send).toHaveBeenCalledWith(mockGraphBuffer);
     });
