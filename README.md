@@ -60,7 +60,7 @@ Choose from various color themes to match your profile style:
 Graph images are cached for 30 minutes. If you want to force a refresh, add an arbitrary query parameter like `&v=YYYY-MM-DD` to the URL:
 
 ```markdown
-[![GitHub Contribution Growth Graph](https://github-contribution-growth-graph.qkitzero.xyz/graph/contributions?user=YOUR_USERNAME&v=2026-03-13)](https://github.com/qkitzero/github-contribution-growth-graph)
+[![GitHub Contribution Growth Graph](https://github-contribution-growth-graph.qkitzero.xyz/graph/contributions?user=YOUR_USERNAME&v=YYYY-MM-DD)](https://github.com/qkitzero/github-contribution-growth-graph)
 ```
 
 Since the URL differs, CDNs and browser caches treat it as a new resource, bypassing the cached version.
