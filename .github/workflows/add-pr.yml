@@ -1,0 +1,52 @@
+name: Add PR to project
+
+on:
+  pull_request:
+    types:
+      - opened
+      - ready_for_review
+      - converted_to_draft
+
+jobs:
+  add-to-project:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/add-to-project@v1.0.2
+        id: add-project
+        with:
+          project-url: https://github.com/users/qkitzero/projects/1
+          github-token: ${{ secrets.ADD_TO_PROJECT_PAT }}
+
+      - env:
+          GH_TOKEN: ${{ secrets.ADD_TO_PROJECT_PAT }}
+        run: |
+          IN_PROGRESS="47fc9ee4"
+          IN_REVIEW="e99e546b"
+
+          if [ "${{ github.event.action }}" = "ready_for_review" ]; then
+            STATUS_ID="$IN_REVIEW"
+          elif [ "${{ github.event.action }}" = "converted_to_draft" ]; then
+            STATUS_ID="$IN_PROGRESS"
+          elif [ "${{ github.event.pull_request.draft }}" = "true" ]; then
+            STATUS_ID="$IN_PROGRESS"
+          else
+            STATUS_ID="$IN_REVIEW"
+          fi
+
+          gh api graphql -f query='
+            mutation($projectId: ID!, $itemId: ID!, $fieldId: ID!, $optionId: String!) {
+              updateProjectV2ItemFieldValue(
+                input: {
+                  projectId: $projectId
+                  itemId: $itemId
+                  fieldId: $fieldId
+                  value: { singleSelectOptionId: $optionId }
+                }
+              ) {
+                projectV2Item { id }
+              }
+            }' \
+            -f projectId="PVT_kwHOCMKcgM4BQaRO" \
+            -f itemId="${{ steps.add-project.outputs.itemId }}" \
+            -f fieldId="PVTSSF_lAHOCMKcgM4BQaROzg-ic8c" \
+            -f optionId="$STATUS_ID"
