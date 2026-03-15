@@ -37,7 +37,7 @@ const graphController = new GraphController(graphUseCase);
 const app = express();
 const port = process.env.PORT || 8000;
 
-app.set('trust proxy', true);
+app.set('trust proxy', 1);
 app.use(rateLimit({ windowMs: 60000, max: 30 }));
 app.use(express.json());
 app.use('/graph', createGraphRoutes(graphController));
