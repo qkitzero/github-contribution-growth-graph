@@ -13,7 +13,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 WORKDIR /usr/src/app
 COPY package*.json ./
-RUN --mount=type=secret,id=npmrc,target=.npmrc npm install
+RUN --mount=type=secret,id=npmrc,target=.npmrc npm ci
 COPY . .
 RUN npm run build
 RUN npm prune --production
