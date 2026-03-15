@@ -55,6 +55,8 @@ steps:
           --timeout=30 \
           --ingress=all \
           --allow-unauthenticated \
+          --startup-probe-path=/health \
+          --liveness-probe-path=/health \
           --set-env-vars=$$(cat .env | xargs | sed 's/ /,/g')
 
 images:
