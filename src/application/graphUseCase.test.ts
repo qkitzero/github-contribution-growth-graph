@@ -9,7 +9,7 @@ import { LoggingService } from './loggingService';
 describe('GraphUseCase', () => {
   const setup = () => {
     const mockAuthService: jest.Mocked<AuthService> = {
-      getM2MToken: jest.fn(),
+      getM2MToken: jest.fn().mockResolvedValue('mock-token'),
     };
     const mockLoggingService: jest.Mocked<LoggingService> = {
       createLog: jest.fn(),

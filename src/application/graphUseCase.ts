@@ -41,13 +41,16 @@ export class GraphUseCaseImpl implements GraphUseCase {
     types?: string,
   ): Promise<Buffer> {
     if (!GraphUseCaseImpl.LOGGING_EXCLUDE_USERS.includes(user)) {
-      const token = await this.authService.getM2MToken();
-      void this.loggingService.createLog(
-        token,
-        'github-contribution-growth-graph',
-        'INFO',
-        `User ${user} created contributions graph with from=${from}, to=${to}, theme=${theme}, size=${size}, types=${types}`,
-      );
+      void this.authService
+        .getM2MToken()
+        .then((token) =>
+          this.loggingService.createLog(
+            token,
+            'github-contribution-growth-graph',
+            'INFO',
+            `User ${user} created contributions graph with from=${from}, to=${to}, theme=${theme}, size=${size}, types=${types}`,
+          ),
+        );
     }
 
     const { fromDate, toDate } = this.calculateDateRange(from, to);
@@ -66,13 +69,16 @@ export class GraphUseCaseImpl implements GraphUseCase {
     size?: string,
   ): Promise<Buffer> {
     if (!GraphUseCaseImpl.LOGGING_EXCLUDE_USERS.includes(user)) {
-      const token = await this.authService.getM2MToken();
-      void this.loggingService.createLog(
-        token,
-        'github-contribution-growth-graph',
-        'INFO',
-        `User ${user} created languages graph with from=${from}, to=${to}, size=${size}`,
-      );
+      void this.authService
+        .getM2MToken()
+        .then((token) =>
+          this.loggingService.createLog(
+            token,
+            'github-contribution-growth-graph',
+            'INFO',
+            `User ${user} created languages graph with from=${from}, to=${to}, size=${size}`,
+          ),
+        );
     }
 
     const { fromDate, toDate } = this.calculateDateRange(from, to);
