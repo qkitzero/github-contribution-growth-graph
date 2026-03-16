@@ -3,7 +3,8 @@ import { ValidationError } from '../application/errors';
 import { GraphUseCase } from '../application/graphUseCase';
 
 export class GraphController {
-  private static readonly CACHE_CONTROL_HEADER = 'public, max-age=1800, s-maxage=1800';
+  private static readonly CACHE_CONTROL_HEADER =
+    'public, max-age=1800, s-maxage=1800, stale-while-revalidate=3600';
 
   constructor(private readonly graphUseCase: GraphUseCase) {}
 
