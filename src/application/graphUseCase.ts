@@ -41,13 +41,19 @@ export class GraphUseCaseImpl implements GraphUseCase {
     types?: string,
   ): Promise<Buffer> {
     if (!GraphUseCaseImpl.LOGGING_EXCLUDE_USERS.includes(user)) {
-      const token = await this.authService.getM2MToken();
-      void this.loggingService.createLog(
-        token,
-        'github-contribution-growth-graph',
-        'INFO',
-        `User ${user} created contributions graph with from=${from}, to=${to}, theme=${theme}, size=${size}, types=${types}`,
-      );
+      void this.authService
+        .getM2MToken()
+        .then((token) =>
+          this.loggingService.createLog(
+            token,
+            'github-contribution-growth-graph',
+            'INFO',
+            `User ${user} created contributions graph with from=${from}, to=${to}, theme=${theme}, size=${size}, types=${types}`,
+          ),
+        )
+        .catch((error) => {
+          console.error('Failed to create log for contributions graph:', error);
+        });
     }
 
     const { fromDate, toDate } = this.calculateDateRange(from, to);
@@ -66,13 +72,19 @@ export class GraphUseCaseImpl implements GraphUseCase {
     size?: string,
   ): Promise<Buffer> {
     if (!GraphUseCaseImpl.LOGGING_EXCLUDE_USERS.includes(user)) {
-      const token = await this.authService.getM2MToken();
-      void this.loggingService.createLog(
-        token,
-        'github-contribution-growth-graph',
-        'INFO',
-        `User ${user} created languages graph with from=${from}, to=${to}, size=${size}`,
-      );
+      void this.authService
+        .getM2MToken()
+        .then((token) =>
+          this.loggingService.createLog(
+            token,
+            'github-contribution-growth-graph',
+            'INFO',
+            `User ${user} created languages graph with from=${from}, to=${to}, size=${size}`,
+          ),
+        )
+        .catch((error) => {
+          console.error('Failed to create log for languages graph:', error);
+        });
     }
 
     const { fromDate, toDate } = this.calculateDateRange(from, to);

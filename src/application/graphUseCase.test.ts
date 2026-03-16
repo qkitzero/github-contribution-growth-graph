@@ -9,7 +9,7 @@ import { LoggingService } from './loggingService';
 describe('GraphUseCase', () => {
   const setup = () => {
     const mockAuthService: jest.Mocked<AuthService> = {
-      getM2MToken: jest.fn(),
+      getM2MToken: jest.fn().mockResolvedValue('mock-token'),
     };
     const mockLoggingService: jest.Mocked<LoggingService> = {
       createLog: jest.fn(),
@@ -101,6 +101,24 @@ describe('GraphUseCase', () => {
       expect(firstCall[2]).toBe('2023-02-01T00:00:00.000Z');
     });
 
+    test('should handle logging failure gracefully', async () => {
+      jest.useRealTimers();
+      const { mockAuthService, mockGitHubClient, graphUseCase } = setup();
+      const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
+
+      mockAuthService.getM2MToken.mockRejectedValue(new Error('token error'));
+      mockGitHubClient.getTotalContributions.mockResolvedValue([]);
+
+      await graphUseCase.createContributionsGraph('test-user');
+      await new Promise(process.nextTick);
+
+      expect(consoleSpy).toHaveBeenCalledWith(
+        'Failed to create log for contributions graph:',
+        expect.any(Error),
+      );
+      consoleSpy.mockRestore();
+    });
+
     test('should create a graph with specified types', async () => {
       const { mockGitHubClient, graphUseCase } = setup();
 
@@ -185,6 +203,24 @@ describe('GraphUseCase', () => {
       expect(firstCall[0]).toBe('test-user');
       expect(firstCall[1]).toBe('2024-01-01T00:00:00.000Z');
       expect(firstCall[2]).toBe('2024-02-01T00:00:00.000Z');
+    });
+
+    test('should handle logging failure gracefully', async () => {
+      jest.useRealTimers();
+      const { mockAuthService, mockGitHubClient, graphUseCase } = setup();
+      const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
+
+      mockAuthService.getM2MToken.mockRejectedValue(new Error('token error'));
+      mockGitHubClient.getLanguageContributions.mockResolvedValue([]);
+
+      await graphUseCase.createLanguagesGraph('test-user');
+      await new Promise(process.nextTick);
+
+      expect(consoleSpy).toHaveBeenCalledWith(
+        'Failed to create log for languages graph:',
+        expect.any(Error),
+      );
+      consoleSpy.mockRestore();
     });
 
     test('should create a language graph with specified dates', async () => {
