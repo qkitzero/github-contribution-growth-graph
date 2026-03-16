@@ -50,7 +50,10 @@ export class GraphUseCaseImpl implements GraphUseCase {
             'INFO',
             `User ${user} created contributions graph with from=${from}, to=${to}, theme=${theme}, size=${size}, types=${types}`,
           ),
-        );
+        )
+        .catch((error) => {
+          console.error('Failed to create log for contributions graph:', error);
+        });
     }
 
     const { fromDate, toDate } = this.calculateDateRange(from, to);
@@ -78,7 +81,10 @@ export class GraphUseCaseImpl implements GraphUseCase {
             'INFO',
             `User ${user} created languages graph with from=${from}, to=${to}, size=${size}`,
           ),
-        );
+        )
+        .catch((error) => {
+          console.error('Failed to create log for languages graph:', error);
+        });
     }
 
     const { fromDate, toDate } = this.calculateDateRange(from, to);
