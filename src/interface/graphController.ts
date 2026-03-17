@@ -4,7 +4,7 @@ import { GraphUseCase } from '../application/graphUseCase';
 
 export class GraphController {
   private static readonly CACHE_CONTROL_HEADER =
-    'public, max-age=1800, s-maxage=1800, stale-while-revalidate=3600';
+    'public, max-age=604800, s-maxage=604800, stale-while-revalidate=604800';
 
   constructor(private readonly graphUseCase: GraphUseCase) {}
 

@@ -51,7 +51,6 @@ steps:
           --max-instances=1 \
           --memory=512Mi \
           --cpu=1 \
-          --cpu-boost \
           --concurrency=80 \
           --timeout=60 \
           --ingress=all \
