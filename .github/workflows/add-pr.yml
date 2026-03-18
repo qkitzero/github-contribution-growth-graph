@@ -1,14 +1,17 @@
 name: Add PR to project
 
 on:
-  pull_request:
+  pull_request_target:
     types:
       - opened
       - ready_for_review
       - converted_to_draft
 
+permissions: {}
+
 jobs:
   add-to-project:
+    if: github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubuntu-latest
     steps:
       - uses: actions/add-to-project@v1.0.2
@@ -19,15 +22,17 @@ jobs:
 
       - env:
           GH_TOKEN: ${{ secrets.ADD_TO_PROJECT_PAT }}
+          PR_ACTION: ${{ github.event.action }}
+          PR_DRAFT: ${{ github.event.pull_request.draft }}
         run: |
           IN_PROGRESS="47fc9ee4"
           IN_REVIEW="e99e546b"
 
-          if [ "${{ github.event.action }}" = "ready_for_review" ]; then
+          if [ "$PR_ACTION" = "ready_for_review" ]; then
             STATUS_ID="$IN_REVIEW"
-          elif [ "${{ github.event.action }}" = "converted_to_draft" ]; then
+          elif [ "$PR_ACTION" = "converted_to_draft" ]; then
             STATUS_ID="$IN_PROGRESS"
-          elif [ "${{ github.event.pull_request.draft }}" = "true" ]; then
+          elif [ "$PR_DRAFT" = "true" ]; then
             STATUS_ID="$IN_PROGRESS"
           else
             STATUS_ID="$IN_REVIEW"
