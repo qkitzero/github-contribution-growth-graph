@@ -5,7 +5,7 @@ import { GraphController } from './graphController';
 
 describe('GraphController', () => {
   const CACHE_CONTROL_HEADER_VALUE =
-    'public, max-age=1800, s-maxage=1800, stale-while-revalidate=3600';
+    'public, max-age=604800, s-maxage=604800, stale-while-revalidate=604800';
 
   const setup = () => {
     const mockGraphUseCase: jest.Mocked<GraphUseCase> = {
