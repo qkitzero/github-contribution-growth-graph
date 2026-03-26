@@ -99,7 +99,7 @@ Choose from various color themes to match your profile style:
 | `user`    | string | **Yes**  | GitHub username                         | -          |
 | `from`    | string | No       | Start date (YYYY-MM-DD)                 | 1 year ago |
 | `to`      | string | No       | End date (YYYY-MM-DD)                   | Today      |
-| `size`    | string | No       | Graph size (`small`, `medium`, `large`) | `medium`   |
+| `size`    | string | No       | Graph size (see [Sizes](#sizes))        | `medium`   |
 
 > Language activity is measured by weighted commits — each commit is weighted by the language byte proportion of its repository. Only public repositories are included. Theme customization is not available for language graphs.
 
@@ -108,7 +108,7 @@ Choose from various color themes to match your profile style:
 Graph images are cached for up to 7 days. To force a refresh, append a version parameter (e.g., today's date) to change the URL:
 
 ```markdown
-[![GitHub Contribution Growth Graph](https://github-contribution-growth-graph.qkitzero.xyz/graph/contributions?user=YOUR_USERNAME&v=2026-03-26)](https://github.com/qkitzero/github-contribution-growth-graph)
+[![GitHub Contribution Growth Graph](https://github-contribution-growth-graph.qkitzero.xyz/graph/contributions?user=YOUR_USERNAME&v=YYYY-MM-DD)](https://github.com/qkitzero/github-contribution-growth-graph)
 ```
 
 Since the URL differs, CDNs and browser caches treat it as a new resource, bypassing the cached version.
