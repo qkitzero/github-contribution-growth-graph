@@ -1,6 +1,7 @@
 {
   "name": "github-contribution-growth-graph",
   "version": "0.0.0",
+  "license": "MIT",
   "main": "dist/server.js",
   "scripts": {
     "format": "prettier --write \"src/**/*.ts\"",
