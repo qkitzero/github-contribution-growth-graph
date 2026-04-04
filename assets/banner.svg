@@ -1,0 +1,92 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 300" width="1200" height="300">
+  <defs>
+    <!-- Area fills with transparency -->
+    <linearGradient id="commitArea" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#2da44e" stop-opacity="0.5" />
+      <stop offset="100%" stop-color="#2da44e" stop-opacity="0.05" />
+    </linearGradient>
+    <linearGradient id="issueArea" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#cf222e" stop-opacity="0.4" />
+      <stop offset="100%" stop-color="#cf222e" stop-opacity="0.03" />
+    </linearGradient>
+    <linearGradient id="prArea" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#0969da" stop-opacity="0.4" />
+      <stop offset="100%" stop-color="#0969da" stop-opacity="0.03" />
+    </linearGradient>
+    <linearGradient id="reviewArea" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#d29922" stop-opacity="0.4" />
+      <stop offset="100%" stop-color="#d29922" stop-opacity="0.03" />
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1200" height="300" rx="10" fill="#0d1117" />
+
+  <!-- Subtle grid -->
+  <g stroke="#21262d" stroke-width="0.5">
+    <line x1="100" y1="60" x2="1160" y2="60" />
+    <line x1="100" y1="120" x2="1160" y2="120" />
+    <line x1="100" y1="180" x2="1160" y2="180" />
+    <line x1="100" y1="240" x2="1160" y2="240" />
+  </g>
+
+  <!-- Review curve (yellow #d29922) — lowest -->
+  <path d="M 520 265 C 570 262, 620 258, 680 250 C 740 242, 800 232, 860 220 C 920 208, 980 195, 1040 180 C 1080 170, 1120 162, 1160 155"
+        fill="none" stroke="#d29922" stroke-width="2.5" stroke-linecap="round" opacity="0.9" />
+  <path d="M 520 265 C 570 262, 620 258, 680 250 C 740 242, 800 232, 860 220 C 920 208, 980 195, 1040 180 C 1080 170, 1120 162, 1160 155 L 1160 270 L 520 270 Z"
+        fill="url(#reviewArea)" />
+
+  <!-- PR curve (blue #0969da) -->
+  <path d="M 520 260 C 570 255, 620 245, 680 230 C 740 215, 800 195, 860 175 C 920 155, 980 135, 1040 118 C 1080 106, 1120 97, 1160 90"
+        fill="none" stroke="#0969da" stroke-width="2.5" stroke-linecap="round" opacity="0.9" />
+  <path d="M 520 260 C 570 255, 620 245, 680 230 C 740 215, 800 195, 860 175 C 920 155, 980 135, 1040 118 C 1080 106, 1120 97, 1160 90 L 1160 270 L 520 270 Z"
+        fill="url(#prArea)" />
+
+  <!-- Issue curve (red #cf222e) -->
+  <path d="M 520 258 C 570 250, 620 236, 680 215 C 740 194, 800 170, 860 148 C 920 126, 980 108, 1040 92 C 1080 82, 1120 74, 1160 68"
+        fill="none" stroke="#cf222e" stroke-width="2.5" stroke-linecap="round" opacity="0.9" />
+  <path d="M 520 258 C 570 250, 620 236, 680 215 C 740 194, 800 170, 860 148 C 920 126, 980 108, 1040 92 C 1080 82, 1120 74, 1160 68 L 1160 270 L 520 270 Z"
+        fill="url(#issueArea)" />
+
+  <!-- Commit curve (green #2da44e) — highest / most prominent -->
+  <path d="M 520 255 C 570 244, 620 225, 680 198 C 740 171, 800 142, 860 115 C 920 88, 980 66, 1040 48 C 1080 37, 1120 30, 1160 25"
+        fill="none" stroke="#2da44e" stroke-width="3" stroke-linecap="round" />
+  <path d="M 520 255 C 570 244, 620 225, 680 198 C 740 171, 800 142, 860 115 C 920 88, 980 66, 1040 48 C 1080 37, 1120 30, 1160 25 L 1160 270 L 520 270 Z"
+        fill="url(#commitArea)" />
+
+  <!-- Y-axis line -->
+  <line x1="520" y1="20" x2="520" y2="270" stroke="#30363d" stroke-width="1" />
+  <!-- X-axis line -->
+  <line x1="520" y1="270" x2="1160" y2="270" stroke="#30363d" stroke-width="1" />
+
+  <!-- Project name -->
+  <text x="60" y="110" font-family="'Segoe UI', system-ui, -apple-system, sans-serif" font-size="34" font-weight="700" fill="#e6edf3" letter-spacing="-0.5">
+    GitHub Contribution
+  </text>
+  <text x="60" y="152" font-family="'Segoe UI', system-ui, -apple-system, sans-serif" font-size="34" font-weight="700" fill="#e6edf3" letter-spacing="-0.5">
+    Growth Graph
+  </text>
+
+  <!-- Tagline -->
+  <text x="62" y="180" font-family="'Segoe UI', system-ui, -apple-system, sans-serif" font-size="13" fill="#8b949e" letter-spacing="0.2">
+    Dynamically generated cumulative contribution graph
+  </text>
+  <text x="62" y="198" font-family="'Segoe UI', system-ui, -apple-system, sans-serif" font-size="13" fill="#8b949e" letter-spacing="0.2">
+    for your GitHub README
+  </text>
+
+  <!-- Legend -->
+  <g font-family="'Segoe UI', system-ui, -apple-system, sans-serif" font-size="11" fill="#8b949e">
+    <rect x="62" y="228" width="10" height="10" rx="2" fill="#2da44e" />
+    <text x="78" y="238">Commit</text>
+    <rect x="132" y="228" width="10" height="10" rx="2" fill="#cf222e" />
+    <text x="148" y="238">Issue</text>
+    <rect x="192" y="228" width="10" height="10" rx="2" fill="#0969da" />
+    <text x="208" y="238">PR</text>
+    <rect x="236" y="228" width="10" height="10" rx="2" fill="#d29922" />
+    <text x="252" y="238">Review</text>
+  </g>
+
+  <!-- Border -->
+  <rect width="1200" height="300" rx="10" fill="none" stroke="#30363d" stroke-width="1" />
+</svg>
