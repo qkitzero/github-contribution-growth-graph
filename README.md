@@ -1,8 +1,15 @@
+<p align="center">
+  <img src="assets/banner.svg" alt="GitHub Contribution Growth Graph" width="100%" />
+</p>
+
 # GitHub Contribution Growth Graph
 
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![release](https://img.shields.io/github/v/release/qkitzero/github-contribution-growth-graph?logo=github)](https://github.com/qkitzero/github-contribution-growth-graph/releases)
 [![Test](https://github.com/qkitzero/github-contribution-growth-graph/actions/workflows/test.yml/badge.svg)](https://github.com/qkitzero/github-contribution-growth-graph/actions/workflows/test.yml)
 [![codecov](https://codecov.io/gh/qkitzero/github-contribution-growth-graph/graph/badge.svg)](https://codecov.io/gh/qkitzero/github-contribution-growth-graph)
+[![Stars](https://img.shields.io/github/stars/qkitzero/github-contribution-growth-graph?style=social)](https://github.com/qkitzero/github-contribution-growth-graph/stargazers)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/qkitzero/github-contribution-growth-graph/pulls)
 
 Visualize your GitHub contribution journey and language usage over multiple years at a glance.
 
