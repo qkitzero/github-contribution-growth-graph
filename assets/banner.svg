@@ -24,10 +24,10 @@
 
   <!-- Subtle grid -->
   <g stroke="#21262d" stroke-width="0.5">
-    <line x1="100" y1="60" x2="1160" y2="60" />
-    <line x1="100" y1="120" x2="1160" y2="120" />
-    <line x1="100" y1="180" x2="1160" y2="180" />
-    <line x1="100" y1="240" x2="1160" y2="240" />
+    <line x1="520" y1="60" x2="1160" y2="60" />
+    <line x1="520" y1="120" x2="1160" y2="120" />
+    <line x1="520" y1="180" x2="1160" y2="180" />
+    <line x1="520" y1="240" x2="1160" y2="240" />
   </g>
 
   <!-- Review curve (yellow #d29922) — lowest -->
@@ -88,5 +88,5 @@
   </g>
 
   <!-- Border -->
-  <rect width="1200" height="300" rx="10" fill="none" stroke="#30363d" stroke-width="1" />
+  <rect x="0.5" y="0.5" width="1199" height="299" rx="10" fill="none" stroke="#30363d" stroke-width="1" />
 </svg>
