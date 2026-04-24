@@ -11,12 +11,23 @@
 [![Stars](https://img.shields.io/github/stars/qkitzero/github-contribution-growth-graph?style=social)](https://github.com/qkitzero/github-contribution-growth-graph/stargazers)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/qkitzero/github-contribution-growth-graph/pulls)
 
-Visualize your GitHub contribution journey and language usage over multiple years at a glance.
+GitHub's contribution graph shows your daily activity — but not your growth story.
 
-While GitHub's contribution graph shows daily activity, it's hard to see your cumulative growth over time. This service generates a dynamic growth graph that clearly displays your accumulated contributions and language statistics across years, perfect for showcasing your consistent effort on your profile. Only public repository contributions are included.
+This service generates a dynamic, cumulative growth graph that reveals how your contributions compound over time, perfect for showcasing your consistent effort on your profile. Only public repository contributions are included.
 
 [![GitHub Contribution Growth Graph](https://github-contribution-growth-graph.qkitzero.xyz/graph/contributions?user=qkitzero&v=2026-03-13)](https://github.com/qkitzero/github-contribution-growth-graph)
 [![GitHub Language Growth Graph](https://github-contribution-growth-graph.qkitzero.xyz/graph/languages?user=qkitzero&v=2026-03-13)](https://github.com/qkitzero/github-contribution-growth-graph)
+
+> ⭐ If this helps you tell your growth story, please consider starring the repo — it helps others discover it too.
+
+## Features
+
+- **Cumulative growth visualization** across multiple years — see how your contributions compound
+- **Language usage breakdown** over time, weighted by commit activity
+- **9 color themes** to match your profile style
+- **Dynamic SVG** — always up to date, no manual regeneration required
+
+> Unlike [github-readme-stats](https://github.com/anuraghazra/github-readme-stats) which shows your *current* stats, this project visualizes your **growth trajectory** over time.
 
 ## Quick Start
 
@@ -119,3 +130,10 @@ Graph images are cached for up to 7 days. To force a refresh, append a version p
 ```
 
 Since the URL differs, CDNs and browser caches treat it as a new resource, bypassing the cached version.
+
+---
+
+<p align="center">
+  Built by <a href="https://github.com/qkitzero">qkitzero</a> ·
+  Also check out <a href="https://github.com/qkitzero/kage-bunshin">kage-bunshin</a> — AI agents for knowledge work
+</p>
