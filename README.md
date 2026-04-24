@@ -25,7 +25,7 @@ This service generates a dynamic, cumulative growth graph that reveals how your 
 - **Cumulative growth visualization** across multiple years — see how your contributions compound
 - **Language usage breakdown** over time, weighted by commit activity
 - **9 color themes** to match your profile style
-- **Dynamic SVG** — always up to date, no manual regeneration required
+- **Dynamic PNG** — always up to date, no manual regeneration required
 
 > Unlike [github-readme-stats](https://github.com/anuraghazra/github-readme-stats) which shows your *current* stats, this project visualizes your **growth trajectory** over time.
 
