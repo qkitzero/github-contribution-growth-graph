@@ -1,6 +1,8 @@
 *
 
 !/src
+!/web
+!/vite.config.ts
 !/package.json
 !/package-lock.json
 !/tsconfig.json
