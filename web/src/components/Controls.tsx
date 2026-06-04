@@ -23,6 +23,7 @@ export function Controls({ state, userError, onChange }: ControlsProps) {
   const isContrib = state.graph === 'contributions';
 
   const toggleType = (type: ContributionType, checked: boolean) => {
+    if (!checked && state.types.length === 1) return;
     const next = checked ? [...state.types, type] : state.types.filter((t) => t !== type);
     onChange({ types: CONTRIBUTION_TYPES.filter((t) => next.includes(t)) });
   };
