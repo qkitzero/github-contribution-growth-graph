@@ -16,8 +16,10 @@ export function SnippetBox({ label, value, disabled }: SnippetBoxProps) {
     try {
       await navigator.clipboard.writeText(value);
     } catch {
-      textareaRef.current?.select();
-      return;
+      const textarea = textareaRef.current;
+      if (!textarea) return;
+      textarea.select();
+      if (!document.execCommand('copy')) return;
     }
 
     setCopied(true);
