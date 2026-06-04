@@ -34,7 +34,7 @@ This service generates a dynamic, cumulative growth graph that reveals how your 
 
 ### Playground
 
-Prefer not to hand-write parameters? Open the **[no-code Playground](https://github-contribution-growth-graph.qkitzero.xyz/)** to configure your graph visually, watch a live preview, and copy ready-to-paste Markdown, URL, or HTML in one click.
+Prefer not to hand-write parameters? Open the **[no-code Playground](https://github-contribution-growth-graph.qkitzero.xyz/)** to configure your graph visually, watch a live preview, and copy ready-to-paste Markdown, URL, or HTML snippets in one click.
 
 ### Contribution Graph
 
