@@ -1,6 +1,7 @@
 import express from 'express';
 import rateLimit from 'express-rate-limit';
 import createClient from 'openapi-fetch';
+import path from 'path';
 import { GraphUseCaseImpl } from './application/graphUseCase';
 import { AuthServiceImpl } from './infrastructure/api/auth/authService';
 import { paths as authPaths } from './infrastructure/api/auth/schema';
@@ -45,6 +46,8 @@ app.use(
   express.json(),
   createGraphRoutes(graphController),
 );
+
+app.use(express.static(path.join(__dirname, '..', 'web', 'dist')));
 
 app.use(ErrorMiddleware.notFoundHandler);
 app.use(ErrorMiddleware.errorHandler);
