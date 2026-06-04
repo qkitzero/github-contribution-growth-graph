@@ -23,7 +23,7 @@
     "chart.js": "^4.5.1",
     "chartjs-node-canvas": "^5.0.0",
     "express": "^5.2.0",
-    "express-rate-limit": "^8.3.1",
+    "express-rate-limit": "^8.5.1",
     "graphql-request": "^7.3.5",
     "openapi-fetch": "^0.15.0"
   },
