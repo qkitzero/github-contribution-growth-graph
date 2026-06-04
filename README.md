@@ -26,10 +26,15 @@ This service generates a dynamic, cumulative growth graph that reveals how your 
 - **Language usage breakdown** over time, weighted by commit activity
 - **9 color themes** to match your profile style
 - **Dynamic PNG** — always up to date, no manual regeneration required
+- **No-code playground** — configure your graph visually and copy the snippet in one click
 
 > Unlike [github-readme-stats](https://github.com/anuraghazra/github-readme-stats) which shows your *current* stats, this project visualizes your **growth trajectory** over time.
 
 ## Quick Start
+
+### Playground
+
+Prefer not to hand-write parameters? Open the **[no-code Playground](https://github-contribution-growth-graph.qkitzero.xyz/)** to configure your graph visually, watch a live preview, and copy ready-to-paste Markdown, URL, or HTML in one click.
 
 ### Contribution Graph
 
