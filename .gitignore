@@ -1,5 +1,6 @@
 /node_modules
 /dist
+/web/dist
 /coverage
 .env*
 !.env.example
