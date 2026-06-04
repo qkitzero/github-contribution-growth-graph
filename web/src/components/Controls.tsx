@@ -47,8 +47,8 @@ export function Controls({ state, userError, onChange }: ControlsProps) {
         <div className="error-text">{state.user.length > 0 ? userError : ''}</div>
       </div>
 
-      <div className="field">
-        <span className="field-label">Graph type</span>
+      <fieldset className="field">
+        <legend className="field-label">Graph type</legend>
         <div className="seg">
           {(['contributions', 'languages'] as GraphType[]).map((g) => (
             <label key={g}>
@@ -63,7 +63,7 @@ export function Controls({ state, userError, onChange }: ControlsProps) {
             </label>
           ))}
         </div>
-      </div>
+      </fieldset>
 
       {isContrib && (
         <div className="field">
@@ -118,10 +118,10 @@ export function Controls({ state, userError, onChange }: ControlsProps) {
       </div>
 
       {isContrib && (
-        <div className="field">
-          <span className="field-label">
+        <fieldset className="field">
+          <legend className="field-label">
             Contribution types <span className="hint">(all by default)</span>
-          </span>
+          </legend>
           <div className="types">
             {CONTRIBUTION_TYPES.map((type) => (
               <label key={type}>
@@ -135,7 +135,7 @@ export function Controls({ state, userError, onChange }: ControlsProps) {
               </label>
             ))}
           </div>
-        </div>
+        </fieldset>
       )}
     </section>
   );
